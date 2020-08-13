@@ -1,0 +1,148 @@
+{
+"audit":[
+{	
+	"level": 1,	
+	"chapters":
+	{
+			"one": {
+				"categories": [
+				{"id":1.1,"name":"filesystem configuration","report":[{"id":"1.1.0","description":"Ensure mounting of cramfs is disabled","isScored":"Scored","result":"Null"},{"id":"1.1.1","description":"Ensure mounting of squashfs is disabled","isScored":"Scored","result":"Null"},{"id":"1.1.2","description":"Ensure mounting of udf is disabled","isScored":"Scored","result":"Null"},{"id":"1.1.3","description":"Ensure /tmp is configured","isScored":"Scored","result":"Null"},{"id":"1.1.4","description":"Ensure nodev, nosuid, noexec option set on /tmp partition","isScored":"Scored","result":"Null"},{"id":"1.1.5","description":"Ensure nodev, nosuid, noexec option set on /var/tmp partition","isScored":"Scored","result":"Null"},{"id":"1.1.6","description":"Ensure nodev option set on /home partition","isScored":"Scored","result":"Null"},{"id":"1.1.7","description":"Ensure nodev, nosuid, noexec set on /dev/shm partition","isScored":"Scored","result":"Null"},{"id":"1.1.8","description":"Ensure nodev, nosuid, noexec set on removable media partition","isScored":"Not Scored","result":"Null"},{"id":"1.1.9","description":"Ensure sticky bit is set on all world-writable directories","isScored":"Scored","result":"Null"},{"id":"1.1.10","description":"Disable Automounting","isScored":"Scored","result":"Null"},{"id":"1.1.11","description":"Ensure mounting of usb-storage is disabled","isScored":"Scored","result":"Null"}]},
+			
+				{"id":1.2,"name":"software updates","report":[{"id":"1.2.0","description":"Ensure GPG keys are configured","isScored":"Not Scored","result":"Null"},{"id":"1.2.1","description":"Ensure gpgcheck is globally activated","isScored":"Scored","result":"Null"},{"id":"1.2.2","description":"Ensure package manager repositories are configured","isScored":"Not Scored","result":"Null"}]},
+			
+				{"id":1.3,"name":"sudo","report":[{"id":"1.3.0","description":"Ensure sudo is installed","isScored":"Scored","result":"Null"},{"id":"1.3.1","description":"Ensure sudo commands use pty","isScored":"Scored","result":"Null"},{"id":"1.3.2","description":"Ensure sudo log file exists","isScored":"Scored","result":"Null"}]},
+			
+				{"id":1.4,"name":"filesystem integrity checking","report":[{"id":"1.4.0","description":"Ensure AIDE is installed","isScored":"Scored","result":"Null"},{"id":"1.4.1","description":"Ensure filesystem integrity is regularly checked","isScored":"Scored","result":"Null"}]},
+			
+				{"id":1.5,"name":"secure boot settings","report":[{"id":"1.5.0","description":"Ensure permissions on bootloader config are configured","isScored":"Scored","result":"Null"},{"id":"1.5.1","description":"Ensure bootloader password is set","isScored":"Scored","result":"Null"},{"id":"1.5.2","description":"Ensure authentication required for single user mode","isScored":"Scored","result":"Null"}]},
+			
+				{"id":1.6,"name":"additional process hardening","report":[{"id":"1.6.0","description":"Ensure core dumps are restricted","isScored":"Scored","result":"Null"},{"id":"1.6.1","description":"Ensure address space layout randomization is enabled","isScored":"Scored","result":"Null"}]},
+			
+				{"id":1.7,"name":"warning banners","report":[{"id":"1.7.0","description":"Ensure message and permissions on /etc/motd are configured properly","isScored":"Scored","result":"Null"},{"id":"1.7.1","description":"Ensure message and permissions on /etc/issue are configured properly","isScored":"Scored","result":"Null"},{"id":"1.7.2","description":"Ensure message and permissions on /etc/issue.net are configured properly","isScored":"Scored","result":"Null"},{"id":"1.7.3","description":"Ensure GDM login banner is configured","isScored":"Scored","result":"Null"},{"id":"1.7.4","description":"Ensure updates, patches and additional security software are installled","isScored":"Not Scored","result":"Null"},{"id":"1.7.5","description":"Ensure system-wide crypto policy is not legacy","isScored":"Scored","result":"Null"}]}
+				]
+			},
+			
+			"two": {
+				"categories": [
+				{"id":2.1,"name":"inetd service","report":[{"id":"2.1.0","description":"Ensure xinetd is not installed","isScored":"Scored","result":"Null"}]},
+				
+				{"id":2.2,"name":"time synchronization","report":[{"id":"2.2.0","description":"Ensure time synchronization is in use","isScored":"Not Scored","result":"Null"},{"id":"2.2.1","description":"Ensure chrony is configured","isScored":"Scored","result":"Null"}]},
+				
+				{"id":2.3,"name":"special purpose services","report":[{"id":"2.3.0","description":"Ensure X Window System is not installed","isScored":"Scored","result":"Null"},{"id":"2.3.1","description":"Ensure rsync service is not enabled","isScored":"Scored","result":"Null"},{"id":"2.3.2","description":"Ensure Avahi Server is not enabled","isScored":"Scored","result":"Null"},{"id":"2.3.3","description":"Ensure SNMP Server is not enabled","isScored":"Scored","result":"Null"},{"id":"2.3.4","description":"Ensure HTTP Proxy Server is not enabled","isScored":"Scored","result":"Null"},{"id":"2.3.5","description":"Ensure Samba is not enabled","isScored":"Scored","result":"Null"},{"id":"2.3.6","description":"Ensure IMAP and POP3 server is not enabled","isScored":"Scored","result":"Null"},{"id":"2.3.7","description":"Ensure HTTP server is not enabled","isScored":"Scored","result":"Null"},{"id":"2.3.8","description":"Ensure FTP server is not enabled","isScored":"Scored","result":"Null"},{"id":"2.3.9","description":"Ensure DNS Server is not enabled","isScored":"Scored","result":"Null"},{"id":"2.3.10","description":"Ensure NFS is not enabled","isScored":"Scored","result":"Null"},{"id":"2.3.11","description":"Ensure RPC is not enabled","isScored":"Scored","result":"Null"},{"id":"2.3.12","description":"Ensure LDAP server is not enabled","isScored":"Scored","result":"Null"},{"id":"2.3.13","description":"Ensure DHCP server is not enabled","isScored":"Scored","result":"Null"},{"id":"2.3.14","description":"Ensure NIS server is not enabled","isScored":"Scored","result":"Null"},{"id":"2.3.15","description":"Ensure NIS server is not enabled","isScored":"Scored","result":"Null"},{"id":"2.3.16","description":"Ensure mail transfer agent is configured for local-only mode","isScored":"Scored","result":"Null"}]},
+				
+				{"id":2.4,"name":"service clients","report":[{"id":"2.4.0","description":"Ensure NIS Client is not installed","isScored":"Scored","result":"Null"},{"id":"2.4.1","description":"Ensure telnet client is not instaled","isScored":"Scored","result":"Null"},{"id":"2.4.2","description":"Ensure LDAP client is not installed","isScored":"Scored","result":"Null"}]}
+				]
+			},
+			
+			"three": {
+				"categories":[
+				{"id":3.1,"name":"network parameter (host only)","report":[{"id":"3.1.0","description":"Ensure IP forwarding is disabled","isScored":"Scored","result":"Null"},{"id":"3.1.1","description":"Ensure packet redirect sending is disabled","isScored":"Scored","result":"Null"}]},
+				
+				{"id":3.2,"name":"network parameter (host and router)","report":[{"id":"3.2.0","description":"Ensure source routed packets are not accepted","isScored":"Scored","result":"Null"},{"id":"3.2.1","description":"Ensure ICMP redirects are not accepted","isScored":"Scored","result":"Null"},{"id":"3.2.2","description":"Ensure suspicious packets are logged","isScored":"Scored","result":"Null"},{"id":"3.2.3","description":"Ensure broadcast ICMP requests are ignored","isScored":"Scored","result":"Null"},{"id":"3.2.4","description":"Ensure bogus ICMP responses are ignored","isScored":"Scored","result":"Null"},{"id":"3.2.5","description":"Ensure Reverse Path Filtering is enabled","isScored":"Scored","result":"Null"},{"id":"3.2.6","description":"Ensure TCP SYN Cookies is enabled","isScored":"Scored","result":"Null"},{"id":"3.2.7","description":"Ensure IPv6 router advertisements are not accepted","isScored":"Scored","result":"Null"}]},
+				
+				{"id":3.3,"name":"firewall configuration","report":[{"id":"3.3.0","description":"Ensure a Firewall package is installed","isScored":"Scored","result":"Null"},{"id":"3.3.1","description":"Ensure firewalld service is enabled and running","isScored":"Scored","result":"Null"},{"id":"3.3.2","description":"Ensure nftables is not enabled","isScored":"Scored","result":"Null"},{"id":"3.3.3","description":"Ensure default zone is set","isScored":"Scored","result":"Null"},{"id":"3.3.4","description":"Ensure network interface are assigned to appropriate zone","isScored":"Not Scored","result":"Null"},{"id":"3.3.5","description":"Ensure unnecessary services and ports are not accepted","isScored":"Not Scored","result":"Null"},{"id":"3.3.6","description":"Ensure iptables is not enabled","isScored":"Scored","result":"Null"},{"id":"3.3.7","description":"Ensure iptables are flushed","isScored":"Not Scored","result":"Null"},{"id":"3.3.8","description":"Ensure a table exists","isScored":"Scored","result":"Null"},{"id":"3.3.9","description":"Ensure base chains exist","isScored":"Scored","result":"Null"},{"id":"3.3.10.1","description":"Ensure loopback traffic is configured - 1.1","isScored":"Scored","result":"Null"},{"id":"3.3.10.2","description":"Ensure loopback traffic is configured - 1.2","isScored":"Scored","result":"Null"},{"id":"3.3.11.1","description":"Ensure outbound and established connections are configured - 1.1","isScored":"Not Scored","result":"Null"},{"id":"3.3.11.2","description":"Ensure outbound and established connections are configured - 1.2","isScored":"Not Scored","result":"Null"},{"id":"3.3.12.1","description":"Ensure default deny firewall policy - 1.1","isScored":"Scored","result":"Null"},{"id":"3.3.12.2","description":"Ensure default deny firewall policy - 1.2","isScored":"Scored","result":"Null"},{"id":"3.3.13","description":"Ensure nftables service is enabled","isScored":"Scored","result":"Null"},{"id":"3.3.14","description":"Ensure nftables rules are permanent","isScored":"Scored","result":"Null"},{"id":"3.3.15","description":"Ensure firewall rules exist for all open ports","isScored":"Scored","result":"Null"},{"id":"3.3.16","description":"Ensure IPv6 default deny firewall policy","isScored":"Scored","result":"Null"},{"id":"3.3.17","description":"Ensure Ipv6 loopback traffic is configured","isScored":"Scored","result":"Null"},{"id":"3.3.18","description":"Ensure IPv6 outbound and established connections are configured","isScored":"Not Scored","result":"Null"},{"id":"3.3.19","description":"Ensure Ipv6 firewall rules exists for all open ports","isScored":"Not Scored","result":"Null"}]},
+				
+				{"id":3.4,"name":"ensure wireless interfaces are disabled","report":[{"id":"3.4.0","description":"Ensure wireless interfaces are disabled","isScored":"Scored","result":"Nul"}]}
+				]
+			
+			},
+
+	
+			"four": {
+				"categories":[
+				{"id":4.1,"name":"configure logging","report":[{"id":"4.1.0","description":"Ensure rsyslog is installed","isScored":"Scored","result":"Null"},{"id":"4.1.1","description":"Ensure rsyslog service is enabled","isScored":"Scored","result":"Null"},{"id":"4.1.2","description":"Ensure rsyslog default file permissions configured","isScored":"Scored","result":"Null"},{"id":"4.1.3","description":"Ensure logging is configured","isScored":"Not Scored","result":"Null"},{"id":"4.1.4","description":"Ensure rsyslog is configured to send logs to a remote log host","isScored":"Scored","result":"Null"},{"id":"4.1.5","description":"Ensure remote rsyslog messages are only accepted on designated log hosts","isScored":"Not Scored","result":"Null"},{"id":"4.1.6","description":"Ensure journald is configured to send logs to rsyslog","isScored":"Scored","result":"Null"},{"id":"4.1.7","description":"Ensure journald is configured to compress large log files","isScored":"Scored","result":"Null"},{"id":"4.1.8","description":"Ensure jounrald is configured to write logfiles to persistent disk","isScored":"Scored","result":"Null"},{"id":"4.1.9","description":"Ensure permissions on all logfiles are configured","isScored":"Scored","result":"Null"}]},
+				
+				{"id":4.2,"name":"log rotation","report":[{"id":"4.2.0","description":"Ensure logrotate is cofigured","isScored":"Not Scored","result":"Null"}]}
+				]
+			},
+			
+			"five": {
+				"categories": [
+				{"id":5.1,"name":"configure cron","report":[{"id":"5.1.0","description":"Ensure cron daemon is enabled","isScored":"Scored","result":"Null"},{"id":"5.1.1","description":"Ensure permissions on /etc/crontab are configured","isScored":"Scored","result":"Null"},{"id":"5.1.2","description":"Ensure permissions on /etc/cron.hourly are configured","isScored":"Scored","result":"Null"},{"id":"5.1.3","description":"Ensure permissions on /etc/cron.daily are configured","isScored":"Scored","result":"Null"},{"id":"5.1.4","description":"Ensure permissions on /etc/cron.weekly are configured","isScored":"Scored","result":"Null"},{"id":"5.1.5","description":"Ensure permissions on /etc/cron.monthly are configured","isScored":"Scored","result":"Null"},{"id":"5.1.6","description":"Ensure permissions on /etc/cron.d are configured","isScored":"Scored","result":"Null"},{"id":"5.1.7","description":"Ensure at /cron is restricted to authorized users","isScored":"Scored","result":"Null"}]},
+				
+				{"id":5.2,"name":"ssh server configuration","report":[{"id":"5.2.0","description":"Ensure permissions on /etc/ssh/sshd_config","isScored":"Scored","result":"Null"},{"id":"5.2.1","description":"Ensure SSH acccess is limited","isScored":"Scored","result":"Null"},{"id":"5.2.2","description":"Ensure permissions on SSH private host key files are configured","isScored":"Scored","result":"Null"},{"id":"5.2.3","description":"Ensure permissions on SSH public host key files are configured","isScored":"Scored","result":"Null"},{"id":"5.2.4","description":"Ensure SSH LogLevel is appropriate","isScored":"Scored","result":"Null"},{"id":"5.2.5","description":"Ensure SSH X11 forwarding is disabled","isScored":"Scored","result":"Null"},{"id":"5.2.6","description":"Ensure SSH MaxAuthTries is set to 4 or less","isScored":"Scored","result":"Null"},{"id":"5.2.7","description":"Ensure SSH IgnoreRhosts is enabled","isScored":"Scored","result":"Null"},{"id":"5.2.8","description":"Ensure SSH HostbasedAuthentication is disabled","isScored":"Scored","result":"Null"},{"id":"5.2.9","description":"Ensure SSH root login is disabled","isScored":"Scored","result":"Null"},{"id":"5.2.10","description":"Ensure SSH PermitEmpyPasswords is disabled","isScored":"Scored","result":"Null"},{"id":"5.2.11","description":"Ensure SSH PermitUserEnvironment is disabled","isScored":"Scored","result":"Null"},{"id":"5.2.12","description":"Ensure SSH Idle Timeout Interval is configured","isScored":"Scored","result":"Null"},{"id":"5.2.13","description":"Ensure SSH LoginGraceTime is set to one minute or less","isScored":"Scored","result":"Null"},{"id":"5.2.14","description":"Ensure SSH warning banner is configured","isScored":"Scored","result":"Null"},{"id":"5.2.15","description":"Ensure SSH PAM is enabled","isScored":"Scored","result":"Null"},{"id":"5.2.16","description":"Ensure SSH MaxStartups is configured","isScored":"Scored","result":"Null"},{"id":"5.2.17","description":"Ensure SSH MaxSessions is set to 4 or less","isScored":"Scored","result":"Null"},{"id":"5.2.18","description":"Ensure system-wide crypto policy is not over-ridden","isScored":"Scored","result":"Null"}]},
+				
+				{"id":5.3,"name":"configure authselect","report":[{"id":"5.3.0","description":"Create custom authselect profile","isScored":"Scored","result":"Null"},{"id":"5.3.1","description":"Select authselect profile","isScored":"Scored","result":"Null"},{"id":"5.3.2","description":"Ensure authselect includes with-faillock","isScored":"Scored","result":"Null"}]},
+				
+				{"id":5.4,"name":"configure pam","report":[{"id":"5.4.0","description":"Ensure password creation requirements are configured","isScored":"Scored","result":"Null"},{"id":"5.4.1","description":"Ensure lockout for failed password attempts is configured","isScored":"Scored","result":"Null"},{"id":"5.4.2","description":"Ensure password reuse is limited","isScored":"Scored","result":"Null"},{"id":"5.4.3","description":"Ensure password hashing algorithm is SHA-512","isScored":"Scored","result":"Null"}]},
+				
+				{"id":5.5,"name":"user accounts and environment","report":[{"id":"5.5.0","description":"Ensure password expiration is 365 days or less","isScored":"Scored","result":"Null"},{"id":"5.5.1","description":"Ensure minimum days between password changes is 7 or more","isScored":"Scored","result":"Null"},{"id":"5.5.2","description":"Ensure password expiration warning days is 7 or more","isScored":"Scored","result":"Null"},{"id":"5.5.3","description":"Ensure inactive password lock is 30 days or less","isScored":"Scored","result":"Null"},{"id":"5.5.4","description":"Ensure all users last password change date is in the past","isScored":"Scored","result":"Null"},{"id":"5.5.5","description":"Ensure system accounts are secured","isScored":"Scored","result":"Null"},{"id":"5.5.6","description":"Ensure default user shell timeout is 900 seconds or less","isScored":"Scored","result":"Null"},{"id":"5.5.7","description":"Ensure default group for the root account is GID 0","isScored":"Scored","result":"Null"},{"id":"5.5.8","description":"Ensure default user umask is 027 or more restrictive","isScored":"Scored","result":"Null"}]},
+				
+				{"id":5.6,"name":"root login configuration","report":[{"id":"5.6.0","description":"Ensure root login is restricted to system console","isScored":"Not Scored","result":"Null"}]},
+				
+				{"id":5.7,"name":"su command","report":[{"id":"5.7.0","description":"ensure access to the su command is restricted","isScored":"Scored","result":"Null"}]}
+				
+				]
+			},
+			
+			"six": {
+				"categories": [
+				{"id":6.1,"name":"system file permissions","report":[{"id":"6.1.0","description":"Ensure permissions on /etc/passwd are configured","isScored":"Scored","result":"Null"},{"id":"6.1.1","description":"Ensure permissions on /etc/shadow are configured","isScored":"Scored","result":"Null"},{"id":"6.1.2","description":"Ensure permissions on /etc/group are configured","isScored":"Scored","result":"Null"},{"id":"6.1.3","description":"Ensure permissions on /etc/gshadow are configured","isScored":"Scored","result":"Null"},{"id":"6.1.4","description":"Ensure permissions on /etc/passwd- are configured","isScored":"Scored","result":"Null"},{"id":"6.1.5","description":"Ensure permissions on /etc/shadow- are configured","isScored":"Scored","result":"Null"},{"id":"6.1.6","description":"Ensure permissions on /etc/group- are configured","isScored":"Scored","result":"Null"},{"id":"6.1.7","description":"Ensure permissions on /etc/gshadow- are configured","isScored":"Scored","result":"Null"},{"id":"6.1.8","description":"Ensure no world writable files exist","isScored":"Scored","result":"Null"},{"id":"6.1.9","description":"Ensure no unowned files or directories exist","isScored":"Scored","result":"Null"},{"id":"6.1.10","description":"Ensure no ungrouped files or directories exist","isScored":"Scored","result":"Null"},{"id":"6.1.11","description":"Audit SUID executables","isScored":"Not Scored","result":"Null"},{"id":"6.1.12","description":"Audit SGID executables","isScored":"Not Scored","result":"Null"}]},
+				
+				{"id":6.2,"name":"user and group settings","report":[{"id":"6.2.0","description":"Ensure password fields are not empty","isScored":"Scored","result":"Null"},{"id":"6.2.1","description":"Ensure no legacy '+' entries exists in /etc/passwd","isScored":"Scored","result":"Null"},{"id":"6.2.2","description":"Ensure root PATH Integrity","isScored":"Scored","result":"Null"},{"id":"6.2.3","description":"Ensure no legacy '+' entries exist in /etc/shadow","isScored":"Scored","result":"Null"},{"id":"6.2.4","description":"Ensure no legacy '+' entries exist in /etc/group","isScored":"Scored","result":"Null"},{"id":"6.2.5","description":"Ensure root is the only UID 0 account","isScored":"Scored","result":"Null"},{"id":"6.2.6","description":"Ensure user's home directories permissions are 750 or more restrictive","isScored":"Scored","result":"Null"},{"id":"6.2.7","description":"Ensure users own their home directories","isScored":"Scored","result":"Null"},{"id":"6.2.8","description":"Ensure user's dot files are not group or world writable","isScored":"Scored","result":"Null"},{"id":"6.2.9","description":"Ensure no users have .forward files","isScored":"Scored","result":"Null"},{"id":"6.2.10","description":"Enusre no users have .netrc files","isScored":"Scored","result":"Null"},{"id":"6.2.11","description":"Ensure users' netrc Files are not group or world accessible","isScored":"Scored","result":"Null"},{"id":"6.2.12","description":"Ensure no users have .rhosts files","isScored":"Scored","result":"Null"},{"id":"6.2.13","description":"Ensure all groups in /etc/passwd exist in /etc/group","isScored":"Scored","result":"Null"},{"id":"6.2.14","description":"Ensure no duplicate UIDs exist","isScored":"Scored","result":"Null"},{"id":"6.2.15","description":"Ensure no duplicate GIDs exist","isScored":"Scored","result":"Null"},{"id":"6.2.16","description":"Ensure no duplicate user names exist","isScored":"Scored","result":"Null"},{"id":"6.2.17","description":"Ensure no duplicate group names exist","isScored":"Scored","result":"Null"},{"id":"6.2.18","description":"Ensure no shadow group is empty","isScored":"Scored","result":"Null"},{"id":"6.2.19","description":"Ensure all users' home directories exist","isScored":"Scored","result":"Null"}]}
+				
+				]
+			
+			}
+	}
+},
+
+{
+	"level": 2,
+	"chapters":
+		{
+			"one":
+			{
+				"categories":[
+				{"id":1.1,"name":"filesystem configuration","report":[{"id":"1.1.0","description":"Ensure mounting of vFAT filesystem is limited","isScored":"Not Scored","result":"Null"},{"id":"1.1.1","description":"Ensure separate partition exists for /var","isScored":"Scored","result":"Null"},{"id":"1.1.2","description":"Ensure separate partition exists for /var/tmp","isScored":"Scored","result":"Null"},{"id":"1.1.3","description":"Ensure separate partition exists for /var/log/audit","isScored":"Scored","result":"Null"},{"id":"1.1.4","description":"Ensure separate partition exists for /home","isScored":"Scored","result":"Null"},{"id":"1.1.5","description":"Disable USB Storage","isScored":"Scored","result":"Null"}]},
+				
+				{"id":1.2,"name":"mandatory access control","report":[{"id":"1.2.0","description":"Ensure SELinux is installed","isScored":"Scored","result":"Null"},{"id":"1.2.1","description":"Ensure SELinux is not disable in bootloader configuration","isScored":"Scored","result":"Null"},{"id":"1.2.2","description":"Ensure SELinux policy is configured","isScored":"Scored","result":"Null"},{"id":"1.2.3","description":"Ensure the SELinux state is enforcing","isScored":"Scored","result":"Null"},{"id":"1.2.4","description":"Ensure no unconfined services exist","isScored":"Scored","result":"Null"},{"id":"1.2.5","description":"Ensure SETroubleshoot is not installed","isScored":"Scored","result":"Null"},{"id":"1.2.6","description":"Ensure the MCS Translation Services(mcstrans) is not installed","isScored":"Scored","result":"Null"}]},
+				
+				{"id":1.3,"name":"warning banners","report":[{"id":"1.3.0","description":"Ensure system-wide crypto policy is FUTURE or FIPS","isScored":"Scored","result":"Null"}]}
+				
+				]
+			},
+			
+			"three":
+			{
+				"categories": [
+				{"id":3.1,"name":"uncommon network protocols","report":[{"id":"3.1.0","description":"Ensure DCCP is disabled","isScored":"Scored","result":"Null"},{"id":"3.1.1","description":"Ensure SCTP is disabled","isScored":"Scored","result":"Null"},{"id":"3.1.2","description":"Ensure RDS is disabled","isScored":"Scored","result":"Null"},{"id":"3.1.3","description":"Ensure TIPC is disabled","isScored":"Scored","result":"Null"}]},
+				
+				{"id":3.2,"name":"wireless configuration","report":[{"id":"3.2.0","description":"Ensure wireless interfaces are disabled","isScored":"Scored","result":"Null"}]},
+				
+				{"id":3.3,"name":"disable ipv6","report":[{"id":"3.3.0","description":"Disable IPv6","isScored":"Not Scored","result":"Null"}]}
+				]
+			},
+			
+			"four": {
+				"categories": [
+				{"id":4.1,"name":"Configure System Accounting","report":[{"id":"4.1.0","description":"Ensure auditd is installed","isScored":"Scored","result":"Null"},{"id":"4.1.1","description":"Ensure auditd service is enabled","isScored":"Not Scored","result":"Null"},{"id":"4.1.2","description":"Ensure auditing for processes that start prior to auditd","isScored":"Scored","result":"Null"},{"id":"4.1.3","description":"Ensure audit_backlog_limit is sufficient","isScored":"Scored","result":"Null"},{"id":"4.1.4","description":"Ensure audit log storage size is configured","isScored":"Scored","result":"Null"},{"id":"4.1.5","description":"Ensure audit logs are not automatically deleted","isScored":"Scored","result":"Null"},{"id":"4.1.6","description":"Ensure system is disabled when audit logs are full","isScored":"Scored","result":"Null"},{"id":"4.1.7","description":"Ensure changes to system administration scope(sudoers) is collected","isScored":"Scored","result":"Null"},{"id":"4.1.8","description":"Ensure login and logout events are collected","isScored":"Scored","result":"Null"},{"id":"4.1.9","description":"Ensure session initiation information is collected","isScored":"Scored","result":"Null"},{"id":"4.1.10","description":"Ensure events that modify date and time information are collected","isScored":"Scored","result":"Null"},{"id":"4.1.11","description":"Ensure events that modify the system's Mandatory Access Controls are collected","isScored":"Scored","result":"Null"},{"id":"4.1.12","description":"Ensure events that modify the system's network environment are collected","isScored":"Scored","result":"Null"},{"id":"4.1.13","description":"Ensure discretionary access control permission modification events are collected","isScored":"Scored","result":"Null"},{"id":"4.1.14","description":"Ensure unsuccessful unauthorized file access attempts are collected","isScored":"Scored","result":"Null"},{"id":"4.1.15","description":"Ensure events that modify user/group information are collected","isScored":"Scored","result":"Null"},{"id":"4.1.16","description":"Ensure successful file system mounts are collected","isScored":"Scored","result":"Null"},{"id":"4.1.17","description":"Ensure use of privileged commands is collected","isScored":"Scored","result":"Null"},{"id":"4.1.18","description":"Ensure file deletion events by users are collected","isScored":"Scored","result":"Null"},{"id":"4.1.19","description":"Ensure kernel module loading and unloading is collected","isScored":"Scored","result":"Null"},{"id":"4.1.20","description":"Ensure system administrator actions (sudolog) are collected","isScored":"Scored","result":"Null"},{"id":"4.1.21","description":"Ensure the audit configuration is immutable","isScored":"Scored","result":"Null"}]}
+				
+				]
+			},
+			
+			"five": {
+				"categories": [
+				{"id":5.1,"name":"ssh server configuration","report":[{"id":"5.1.0","description":"Ensure SSH AllowTcpForwarding is disabled","isScored":"Scored","result":"Null"}]}
+				
+				]
+			
+			},
+			
+			"six": {
+				"categories": [
+				{"id":6.1,"name":"system file permissions","report":[{"id":"6.1.0","description":"Audit system file permissions","isScored":"Scored","result":"Null"}]}
+				
+				]
+			}
+		}
+}
+]
+}		
+					
+					
+					
+					
+					
+					
+					
