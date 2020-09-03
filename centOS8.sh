@@ -4,12 +4,15 @@
 args=$@
 exit_code=0
 tos=1 ## TIME TO SLEEP
+all=0
 
 chp="" # chapter
 catid="" # categories id
-
 level=0
 result=Fail
+
+declare -a excl_arr1
+declare -a excl_arr2
 
 ## DECLARING THE DIRECTORIES ##
 LOG_DIR="/var/log/centOS8_audit"
@@ -50,15 +53,20 @@ function write_result()
 
 function write_info()
 {
-	echo "$(date -Ins) [INFO] $@" >> "$debug_dir/$debug_file"
-
+	if [ verbose ]; then
+		echo "$(date -Ins) [INFO] $@" | tee -a "$debug_dir/$debug_file"
+	else
+		echo "$(date -Ins) [INFO] $@" >> "$debug_dir/$debug_file"
+	fi
 }
 
 function write_debug()
 {
-
-	echo "$(date -Ins) [DEBUG] $@" >> "$debug_dir/$debug_file" 
-
+	if [ verbose ]; then
+		echo "$(date -Ins) [DEBUG] $@" | tee -a "$debug_dir/$debug_file"
+	else
+		echo "$(date -Ins) [DEBUG] $@" >> "$debug_dir/$debug_file" 
+	fi
 }
 
 		###	Renaming LOG FILE	###
@@ -79,16 +87,163 @@ function rename()
 
 		###	  DEFINE FUNCTIONS	###
 
-## ERROR FUNCTION ##
-function display()
+## USAGE FUNCTION ##
+function usage()
 {
 	cat << EOF
 OPTIONS: 
-	-h, help		Display the help message
-	-l, level		Indicate the level 1 or 2 for server/workstation to audit
+	-h, 	--help		Display the help message
+	-ls, 	--list
+	-l, 	--level		Indicate the level 1 or 2 for server/workstation to audit
+	-a,	--all		Indicate to the script to run audit level 1 and 2
+	-e, 	--exclude	Indicate the level and categories id to be excluded from auditing.
+	-vv, 	--verbose	Display the debug file, while the script is running
+
+EXAMPLE:
+	sudo ./centOS8.sh -l 1 -e 1,1.1 -vv	#Execute the script to audit only LEVEL 1 but exclude categories id 1.1
 
 EOF
 }
+
+function display()
+{
+	cat << EOF
+CentOS 8 Auditing Scripts
+Level 1:
+	Chapter 1:
+	||
+	========> Categories ID  |	Name
+		  -------------------------------------------
+		  1.1		 |  FILESYSTEM CONFIGURATION
+		  -------------------------------------------
+		  1.2		 |  SOFTWARE UPDATES
+		  -------------------------------------------
+		  1.3		 |  SUDO
+		  -------------------------------------------
+		  1.4		 |  FILESYSTEM INTEGRITY 
+				 |  CHECK
+		  -------------------------------------------
+		  1.5 		 |  SECURE BOOT SETTINGS
+		  -------------------------------------------
+		  1.6		 |  ADDITIONAL PROCESS
+				 |  HARDENING
+		  -------------------------------------------
+		  1.7		 |  WARNING BANNERS
+		  -------------------------------------------
+
+	Chapter 2:
+	||
+	========> Categories ID  |  	Name
+		  -------------------------------------------
+		  2.1		 |  INETD SERVICE
+		  -------------------------------------------
+		  2.2		 |  TIME SYNCHRONIZATION
+		  -------------------------------------------
+		  2.3		 |  SPECIAL PURPOSE SERVICES
+		  -------------------------------------------
+		  2.4		 |  SERVICE CLIENTS
+		  -------------------------------------------
+	
+	Chapter 3:
+	||
+	========> Categories ID  | 	Name
+		  -------------------------------------------
+		  3.1		 |  NETWORK PARAMETER (host only)
+		  -------------------------------------------
+		  3.2		 |  NETWORK PARAMETER (host and router)
+		  -------------------------------------------
+		  3.3		 |  FIREWALL CONFIGURATION
+		  -------------------------------------------
+		  3.4		 |  WIRELESS INTERFACES
+		  -------------------------------------------
+
+	Chapter 4:
+	||
+	========> Categories ID  | 	Name
+		  -------------------------------------------
+		  4.1		 |  CONFIGURE LOGGING
+		  -------------------------------------------
+		  4.2		 |  LOG ROTATION
+		  -------------------------------------------
+
+	Chapter 5:
+	||
+	========> Categories ID  | 	Name
+		  -------------------------------------------
+		  5.1		 |  CONFIGURE CRON
+		  -------------------------------------------
+		  5.2		 |  SSH SERVER CONFIGURATION
+		  -------------------------------------------
+		  5.3		 |  CONFIGURE AUTHSELECT
+		  -------------------------------------------
+		  5.4		 |  CONFIGURE PAM
+		  -------------------------------------------
+		  5.5		 |  USER ACCOUNTS &
+				 |  Environment
+		  -------------------------------------------
+		  5.6		 |  ROOT LOGIN CONFIGURATION
+		  -------------------------------------------
+		  5.7		 |  SU COMMAND
+		  -------------------------------------------
+
+	Chapter 6:
+	||
+	========> Categories ID  | 	Name
+		  -------------------------------------------
+		  6.1		 |  SYSTEM FILE PERMISSIONS
+		  -------------------------------------------
+		  6.2		 |  USER & GROUP SETTINGS
+		  -------------------------------------------
+
+
+Level 2:
+	Chapter 1:
+	||
+	========> Categories ID  | 	Name
+		  -------------------------------------------
+		  1.1		 |  FILESYSTEM CONFIGURATION
+		  -------------------------------------------
+		  1.2		 |  MANDATORY ACCESS CONTROL
+		  -------------------------------------------
+		  1.3		 |  WARNING BANNERS
+		  -------------------------------------------
+
+	Chapter 3:
+	||
+	========> Categories ID  | 	Name
+		  -------------------------------------------
+		  3.1		 |  UNCOMMON NETWORK PROTOCOL
+		  -------------------------------------------
+		  3.2		 |  WIRELESS CONFIGURATION
+		  -------------------------------------------
+		  3.3		 |  DISABLE IPv6
+		  -------------------------------------------
+
+	Chapter 4:
+	||
+	========> Categories ID  | 	Name
+		  -------------------------------------------
+		  4.1		 |  CONFIGURE SYSTEM
+				 |  ACCOUNTING
+		  -------------------------------------------
+
+	Chapter 5:
+	||
+	========> Categories ID  | 	Name
+		  -------------------------------------------
+		  5.1		 |  SSH SERVER CONFIGURATION
+		  -------------------------------------------
+
+	Chapter 6:
+	||
+	========> Categories ID  | 	Name
+		  -------------------------------------------
+		  6.1		 |  SYSTEM FILE PERMISSIONS
+		  -------------------------------------------
+
+EOF
+}
+	
 
 function run_test()
 {
@@ -102,6 +257,28 @@ function run_test()
 
 	write_debug "Level $level, function $funct running with id $id"
 	
+}
+
+function test_excluded()
+{
+	local excl num
+	excl=$1
+	num=0
+	ex_test=($(echo "$excl" | sed 's/,/ /g'))
+
+	while [ -n "${ex_test[num]}" ]; do
+		if [ "$(echo "${ex_test[num]}" | awk -F . '{if($1 == 1) print 0}')" == "0" ]; then
+			var=$(echo "${ex_test[num]}" | sed 's/^[[:digit:]]\.//g')
+			excl_arr1+=("${var}")
+		elif [ "$(echo "${ex_test[num]}" | awk -F . '{if($1 == 2) print 0}')" == "0" ]; then
+			var=$(echo "${ex_test[num]}" | sed 's/^[[:digit:]]\.//g')
+                        excl_arr2+=("${var}")
+		else
+			echo "Invalid format or value being passed"
+		fi
+
+		num=$((num + 1))
+	done
 }
 
 		### COMMON FUNCTION FOR BOTH LVL 1 & 2, ACROSS ALL CHAPTERS	###
@@ -2086,62 +2263,118 @@ function audit_conf3()
 }
 
 
+if [ $# -eq 0 ]; then
+	usage
+	exit 1
+fi
+
+
+
+		##	Checking OPTIONS	##
+while :; do
+	case $1 in
+		-h|--help)
+			usage		#display the function usage
+			exit 0
+			;;
+		-ls|--list)
+			display		#list down the categories ID and name
+			exit 0
+			;;
+		-l|--level)
+			if [ ! -z "$2" ]; then
+				lvl=$2
+				shift
+				shift
+			else
+				echo "Error: did not indicate the level."
+				usage
+				exit 1
+			fi
+			;;
+		-e|--exclude)
+			if [ $2 ]; then
+				test_excluded $2
+				shift
+				shift
+			else
+				echo "Error: did not indicate the category id to be excluded from auditing."
+				usage
+				exit 1
+			fi
+			;;
+		-vv|--verbose)
+			verbose=1
+			shift
+			;;
+		--)
+			shift
+			break
+			;;
+		*)
+			break
+	esac
+done		
+
+[ -z $lvl ] && all=1
+
+
 banner		#Display the banner function
 	
 		###	Checking for Directories	###
-echo "Checking of $LOG_DIR"
+write_info "Checking of $LOG_DIR..."
 sleep $tos
 
 if [ -d "$LOG_DIR" ] 
 then
-	echo "$LOG_DIR exists"
+	write_debug "$LOG_DIR exists"
 	if [ -d "$sub_logdir" ]
 	then
-		echo "$sub_logdir exists"
+		write_debug "$sub_logdir exists"
 		sleep 0.25
 	else
-		echo "Creating $sub_logdir"
+		write_debug "Creating $sub_logdir"
 		mkdir "$sub_logdir"
 		sleep 0.25
 	fi
 
 	if [ -d "$debug_dir" ]
 	then
-		echo "$debug_dir exists"
+		write_debug "$debug_dir exists"
 		sleep 0.25
 	else
-		echo "Creating $debug_dir"
+		write_debug "Creating $debug_dir"
 		mkdir "$debug_dir"
 	fi
 		
 else
-	echo "Creating /var/log/centOS8_audit"
+	write_debug "Creating /var/log/centOS8_audit"
 	mkdir "$LOG_DIR"
 
-	echo "Creating subdirectories now...."
+	write_debug "Creating subdirectories now...."
 	sleep 0.5
 
 	mkdir "$sub_logdir"
-	echo "$sub_logdir is created"
+	write_debug "$sub_logdir is created"
 	sleep 0.25
 
 	mkdir "$debug_dir"
-	echo "$debug_dir is created"
+	write_debug "$sub_logdir is created"
 	sleep 0.5
 
-	echo "Directories created..."
+	write_info "Directories created..."
 fi
 
 		### Creating DEBUG FILE under debug directories	###
 
 if [ -e "$debug_dir/$debug_file" ]
 then
-	echo "centos_debug.log exists"
+	write_debug "centos_debug.log exists"
 else
-	echo "Creating centos_debug.log"
+	write_debug "Creating centos_debug.log"
 	touch "$debug_dir/$debug_file"
 
-	echo "Debug file created..."
+	write_info "Debug file created..."
 fi
 
 		### Checking for JSON FILE	###
@@ -2155,383 +2388,405 @@ then
 	cp "$JSN_DIR/${JSN_FIL}.old" "$JSN_DIR/${JSN_FIL}"
 
 else
-	echo "centOS8.json does not exists"
+	echo "$(date -Ins) [ERROR] centOS8.json does not exists"
 	exit 1
 fi
 
 
-		###	 MAIN	 ###
+		###	 MAIN	 ### 
 write_info "Initiating....."
 write_info "Audit Test Starting"
-echo "Audit Test Starting...."
 
-if [ -z $arg ]
+if [[ $lvl -eq 1  ]] || [[ $all -eq 1 ]]
 then
 	##--LEVEL 1--##
 	#chp. 1 INITIAL SETUP
 	#catg: filesystem
-	run_test is_disabled 1 one 1.1 1.1.0 cramfs		#Ensure mounting of cramfs is disabled
-	run_test is_disabled 1 one 1.1 1.1.1 squashfs 		#Ensure mounting of squashfs is disabled
-	run_test is_disabled 1 one 1.1 1.1.2 udf 		#Ensure mounting of udf is disabled
-	run_test tmp_config 1 one 1.1 1.1.3			#Ensure /tmp is configured
-	run_test check_fs_option 1 one 1.1 1.1.4 /tmp 		#Ensure nodev, nosuid, noexec option set on /tmp partition 
-	run_test check_fs_option 1 one 1.1 1.1.5 /var/tmp   	#Ensure nodev, nosuid, noexec option set on /var/tmp partition
+	if [[ !("${excl_arr1[@]}" =~ "1.1") ]]; then
+		run_test is_disabled 1 one 1.1 1.1.0 cramfs		#Ensure mounting of cramfs is disabled
+		run_test is_disabled 1 one 1.1 1.1.1 squashfs 		#Ensure mounting of squashfs is disabled
+		run_test is_disabled 1 one 1.1 1.1.2 udf 		#Ensure mounting of udf is disabled
+		run_test tmp_config 1 one 1.1 1.1.3			#Ensure /tmp is configured
+		run_test check_fs_option 1 one 1.1 1.1.4 /tmp 		#Ensure nodev, nosuid, noexec option set on /tmp partition 
+		run_test check_fs_option 1 one 1.1 1.1.5 /var/tmp   	#Ensure nodev, nosuid, noexec option set on /var/tmp partition
 
-	run_test not_scored 1 one 1.1 1.1.8			#Ensure nodev, nosuid, noexec option set on removable media partition
-	run_test sticky_bit 1 one 1.1 1.1.9			#Ensure sticky bit is set on all world-writable directories
-	run_test disable_automount 1 one 1.1 1.1.10		#Disable Automounting
-	run_test is_disabled 1 one 1.1 1.1.11 usb-storage	#Ensure mounting of usb-storage is disabled
+		run_test not_scored 1 one 1.1 1.1.8			#Ensure nodev, nosuid, noexec option set on removable media partition
+		run_test sticky_bit 1 one 1.1 1.1.9			#Ensure sticky bit is set on all world-writable directories
+		run_test disable_automount 1 one 1.1 1.1.10		#Disable Automounting
+		run_test is_disabled 1 one 1.1 1.1.11 usb-storage	#Ensure mounting of usb-storage is disabled
+	fi
 	
 	#catg: software_update
-	run_test not_scored 1 one 1.2 1.2.0			#Ensure GPG keys are configured
-	run_test gpg_check 1 one 1.2 1.2.1			#Ensure gpgcheck is globally activated
-	run_test not_scored 1 one 1.2 1.2.2			#Ensure package manager repositories are configured
+	if [[ !("${excl_arr1[@]}" =~ "1.2") ]]; then
+		run_test not_scored 1 one 1.2 1.2.0			#Ensure GPG keys are configured
+		run_test gpg_check 1 one 1.2 1.2.1			#Ensure gpgcheck is globally activated
+		run_test not_scored 1 one 1.2 1.2.2			#Ensure package manager repositories are configured
+	fi
 
 	#catg: sudo
-	run_test chkpkg_installed 1 one 1.3 1.3.0 sudo 1	#Ensure sudo is installed
-	run_test check_pty 1 one 1.3 1.3.1			#Ensure sudo commands use pty
-	run_test sudo_log 1 one 1.3 1.3.2			#Ensure sudo log file exists
+	if [[ !("${excl_arr1[@]}" =~ "1.3") ]]; then
+		run_test chkpkg_installed 1 one 1.3 1.3.0 sudo 1	#Ensure sudo is installed
+		run_test check_pty 1 one 1.3 1.3.1			#Ensure sudo commands use pty
+		run_test sudo_log 1 one 1.3 1.3.2			#Ensure sudo log file exists
+	fi
 
 	#catg: filesystem_integrity
-	run_test chkpkg_installed 1 one 1.4 1.4.0 aide 1	#Ensure AIDE is installed 
-	run_test fs_periodic_check 1 one 1.4 1.4.1		#Ensure filesystem integirty is regularly
+	if [[ !("${excl_arr1[@]}" =~ "1.4") ]]; then
+		run_test chkpkg_installed 1 one 1.4 1.4.0 aide 1	#Ensure AIDE is installed 
+		run_test fs_periodic_check 1 one 1.4 1.4.1		#Ensure filesystem integirty is regularly
+	fi
 
 	#catg: secure_boot_settings
-	run_test boot_config 1 one 1.5 1.5.0			#Ensure permissions on bootloader config are configured
-	run_test boot_passwd 1 one 1.5 1.5.1			#Ensure bootloader password is set
-	run_test auth_single_usr 1 one 1.5 1.5.2		#Ensure authentication required for single user mode
+	if [[ !("${excl_arr1[@]}" =~ "1.5") ]]; then
+		run_test boot_config 1 one 1.5 1.5.0			#Ensure permissions on bootloader config are configured
+		run_test boot_passwd 1 one 1.5 1.5.1			#Ensure bootloader password is set
+		run_test auth_single_usr 1 one 1.5 1.5.2		#Ensure authentication required for single user mode
+	fi
 
 	#catg: additional_process_hardening
-	run_test cd_restrict 1 one 1.6 1.6.0			#Ensure core dumps are restricted
-	run_test alsr_enabled 1 one 1.6 1.6.1			#Ensure address space layout randomization is enabled
+	if [[ !("${excl_arr1[@]}" =~ "1.6") ]]; then
+		run_test cd_restrict 1 one 1.6 1.6.0			#Ensure core dumps are restricted
+		run_test alsr_enabled 1 one 1.6 1.6.1			#Ensure address space layout randomization is enabled
+	fi
 	
 	#catg: motd
-
-	run_test motd_config 1 one 1.7 1.7.2 /etc/issue.net	#Ensure message and permissions on /etc/issue.net are configured properly
-	run_test gdm_config 1 one 1.7 1.7.3 			#Ensure GDM login banner is configured
-	run_test not_scored 1 one 1.7 1.7.4			#Ensure updates, patches and additional security software
-	run_test crypto_policy 1 one 1.7 1.7.5 1		#Ensure system-wide crypto policy is not legacy
+	if [[ !("${excl_arr1[@]}" =~ "1.7") ]]; then
+		run_test motd_config 1 one 1.7 1.7.0 /etc/motd		#Ensure message and permissions on /etc/motd are configured properly
+		run_test motd_config 1 one 1.7 1.7.1 /etc/issue		#Ensure message and permissions on /etc/issue are configured properly 
+		run_test motd_config 1 one 1.7 1.7.2 /etc/issue.net	#Ensure message and permissions on /etc/issue.net are configured properly
+		run_test gdm_config 1 one 1.7 1.7.3 			#Ensure GDM login banner is configured
+		run_test not_scored 1 one 1.7 1.7.4			#Ensure updates, patches and additional security software
+		run_test crypto_policy 1 one 1.7 1.7.5 1		#Ensure system-wide crypto policy is not legacy
+	fi
 
 	#----------------------------------#
 	#chp. 2 SERVICES
 	#catg: inetd services
-	run_test chkpkg_installed 1 two 2.1 2.1.0 xinetd 0 	#Ensure xinetd is not installed
+	if [[ !("${excl_arr1[@]}" =~ "2.1") ]]; then
+		run_test chkpkg_installed 1 two 2.1 2.1.0 xinetd 0 	#Ensure xinetd is not installed
+	fi
 
 	#catg: time synchronization
-	run_test not_scored 1 two 2.2 2.2.0		   	#Ensure time syncrhonization is in use
-	run_test chrony_config 1 two 2.2 2.2.1		  	#Ensure chrony is configured
+	if [[ !("${excl_arr1[@]}" =~ "2.2") ]]; then
+		run_test not_scored 1 two 2.2 2.2.0		   	#Ensure time syncrhonization is in use
+		run_test chrony_config 1 two 2.2 2.2.1		  	#Ensure chrony is configured
+	fi
 
 	#catg: Special Purpose Services
-	run_test chkpkg_installed 1 two 2.3 2.3.0 xorg-x11* 0	#Ensure X Window System is not installed
-	run_test not_enabled 1 two 2.3 2.3.1 rsyncd		#Ensure Rsync service is not enabled 
-	run_test not_enabled 1 two 2.3 2.3.2 avahi-daemon	#Ensure Avahi Server is not enabled
-	run_test not_enabled 1 two 2.3 2.3.3 snmpd 		#Ensure SNMP Server is not enabled
-	run_test not_enabled 1 two 2.3 2.3.4 squid		#Ensure HTTP Proxy Server is not enabled 
-	run_test not_enabled 1 two 2.3 2.3.5 smb		#Ensure Samba is not enabled
-	run_test not_enabled 1 two 2.3 2.3.6 dovecot		#Ensure IMAP & POP3 server is not enabled
-	run_test not_enabled 1 two 2.3 2.3.7 httpd		#Ensure HTTP server is not enabled
-	run_test not_enabled 1 two 2.3 2.3.8 vsftpd		#Ensure FTP server is not enabled
-	run_test not_enabled 1 two 2.3 2.3.9 named		#Ensure DNS server is not enabled
-	run_test not_enabled 1 two 2.3 2.3.10 nfs		#Enusre NFS is not enabled
-	run_test not_enabled 1 two 2.3 2.3.11 rpcbind		#Ensure RPC is not enabled
-	run_test not_enabled 1 two 2.3 2.3.12 slapd		#Ensure LDAP server is not enabled
-	run_test not_enabled 1 two 2.3 2.3.13 dhcpd		#Ensure DHCP server is not enabled
-	run_test not_enabled 1 two 2.3 2.3.14 cups		#Ensure CUPS is not enabled
-	run_test not_enabled 1 two 2.3 2.3.15 ypserv		#Enusre NIS server is not enabled
-	run_test mail_tagent 1 two 2.3 2.3.16 			#Ensure mail transfer agent is configured for local-only mode
+	if [[ !("${excl_arr1[@]}" =~ "2.3") ]]; then
+		run_test chkpkg_installed 1 two 2.3 2.3.0 xorg-x11* 0	#Ensure X Window System is not installed
+		run_test not_enabled 1 two 2.3 2.3.1 rsyncd		#Ensure Rsync service is not enabled 
+		run_test not_enabled 1 two 2.3 2.3.2 avahi-daemon	#Ensure Avahi Server is not enabled
+		run_test not_enabled 1 two 2.3 2.3.3 snmpd 		#Ensure SNMP Server is not enabled
+		run_test not_enabled 1 two 2.3 2.3.4 squid		#Ensure HTTP Proxy Server is not enabled 
+		run_test not_enabled 1 two 2.3 2.3.5 smb		#Ensure Samba is not enabled
+		run_test not_enabled 1 two 2.3 2.3.6 dovecot		#Ensure IMAP & POP3 server is not enabled
+		run_test not_enabled 1 two 2.3 2.3.7 httpd		#Ensure HTTP server is not enabled
+		run_test not_enabled 1 two 2.3 2.3.8 vsftpd		#Ensure FTP server is not enabled
+		run_test not_enabled 1 two 2.3 2.3.9 named		#Ensure DNS server is not enabled
+		run_test not_enabled 1 two 2.3 2.3.10 nfs		#Enusre NFS is not enabled
+		run_test not_enabled 1 two 2.3 2.3.11 rpcbind		#Ensure RPC is not enabled
+		run_test not_enabled 1 two 2.3 2.3.12 slapd		#Ensure LDAP server is not enabled
+		run_test not_enabled 1 two 2.3 2.3.13 dhcpd		#Ensure DHCP server is not enabled
+		run_test not_enabled 1 two 2.3 2.3.14 cups		#Ensure CUPS is not enabled
+		run_test not_enabled 1 two 2.3 2.3.15 ypserv		#Enusre NIS server is not enabled
+		run_test mail_tagent 1 two 2.3 2.3.16 			#Ensure mail transfer agent is configured for local-only mode
+	fi
 
 	#catg: Service Clients
-	run_test chkpkg_installed 1 two 2.4 2.4.0 ypbind 0	#Ensure NIS Client is not installed
-	run_test chkpkg_installed 1 two 2.4 2.4.1 telnet 0	#Ensure Telnet Client is not installed
-	run_test chkpkg_installed 1 two 2.4 2.4.2 openldap-clients 0 #Ensure LDAP client is not installed
+	if [[ !("${excl_arr1[@]}" =~ "2.4") ]]; then
+		run_test chkpkg_installed 1 two 2.4 2.4.0 ypbind 0	#Ensure NIS Client is not installed
+		run_test chkpkg_installed 1 two 2.4 2.4.1 telnet 0	#Ensure Telnet Client is not installed
+		run_test chkpkg_installed 1 two 2.4 2.4.2 openldap-clients 0 #Ensure LDAP client is not installed
+	fi
 
 	#----------------------------------#
 	#chp. 3 NETWORK CONFIGURATION
 	#catg: network parameter (host only)
-	run_test sysctl_1 1 three 3.1 3.1.0 ip_forward 1 forwarding	#Ensure IP forwarding is disabled
-	run_test sysctl_2 1 three 3.1 3.1.1 send_directs 0		#Ensure packet redirect sending is disabled
+	if [[ !("${excl_arr1[@]}" =~ "3.1") ]]; then
+		run_test sysctl_1 1 three 3.1 3.1.0 ip_forward 1 forwarding	#Ensure IP forwarding is disabled
+		run_test sysctl_2 1 three 3.1 3.1.1 send_directs 0		#Ensure packet redirect sending is disabled
+	fi
 	
 	#catg: network parameter (host and router)
-	run_test sysctl_2 1 three 3.2 3.2.0 accept_source_route 1	#Ensure source routed packets are not accepted
-	run_test sysctl_2 1 three 3.2 3.2.1 secure_redirects 0		#Ensure ICMP redirects are not accepeted
-	run_test sysctl_2 1 three 3.2 3.2.2 log_martians 0		#Ensure suspicious packets are logged
-	run_test sysctl_1 1 three 3.2 3.2.3 icmp_echo_ignore_broadcasts 0 0	#Ensure broadcast ICMP requests are ignored
-	run_test sysctl_1 1 three 3.2 3.2.4 icmp_ignore_bogus_error_responses 0 0 #Ensure bogus ICMP responses are ignored
-	run_test sysctl_2 1 three 3.2 3.2.5 rp_filter 0			#Ensure Reverse Path Filtering is enabled
-	run_test sysctl_1 1 three 3.2 3.2.6 tcp_syncookies 0		#Ensure TCP SYN Cookies is enabled
-	run_test ipv6_route 1 three 3.2 3.2.7				#Ensure IPv6 route advertisements are not accepted
+	if [[ !("${excl_arr1[@]}" =~ "3.2") ]]; then
+		run_test sysctl_2 1 three 3.2 3.2.0 accept_source_route 1	#Ensure source routed packets are not accepted
+		run_test sysctl_2 1 three 3.2 3.2.1 secure_redirects 0		#Ensure ICMP redirects are not accepeted
+		run_test sysctl_2 1 three 3.2 3.2.2 log_martians 0		#Ensure suspicious packets are logged
+		run_test sysctl_1 1 three 3.2 3.2.3 icmp_echo_ignore_broadcasts 0 0	#Ensure broadcast ICMP requests are ignored
+		run_test sysctl_1 1 three 3.2 3.2.4 icmp_ignore_bogus_error_responses 0 0 #Ensure bogus ICMP responses are ignored
+		run_test sysctl_2 1 three 3.2 3.2.5 rp_filter 0			#Ensure Reverse Path Filtering is enabled
+		run_test sysctl_1 1 three 3.2 3.2.6 tcp_syncookies 0		#Ensure TCP SYN Cookies is enabled
+		run_test ipv6_route 1 three 3.2 3.2.7				#Ensure IPv6 route advertisements are not accepted
+	fi
 
 	#catg: firewall configuration
-	run_test fw_isinstall 1 three 3.3 3.3.0			#Ensure Firewall package is installed
-	run_test fw_chkenabled 1 three 3.3 3.3.1 firewalld	#Ensure firewalld service is enabled and running
-	run_test fw_chkenabled 1 three 3.3 3.3.2 nftables	#Ensure nftables is not enabled
-	run_test default_zone 1 three 3.3 3.3.3			#Ensure default zone is set
-	run_test not_scored 1 three 3.3 3.3.4			#Ensure unnecessary services and ports are not accepted
-	run_test not_scored 1 three 3.3 3.3.5			#Ensure network interface are assigned to appropriate zone
-	run_test fw_chkenabled 1 three 3.3 3.3.6 iptables	#Ensure iptables is not enabled
-	run_test not_scored 1 three 3.3 3.3.7			#Ensure iptables are flushed
-	run_test nft_1 1 three 3.3 3.3.8 tables			#Ensure a table exists
-	run_test nft_2 1 three 3.3 3.3.9 	 		#Ensure base chains exist
-	run_test nft_3 1 three 3.3 3.3.10.1			#Ensure loopback traffic is configured - 1.1
-	run_test chk_iptables 1 three 3.3 3.3.10.2 loopback 	#Ensure loopback traffic is configured - 1.2
-	run_test not_scored 1 three 3.3 3.3.11.1		#Ensure outbound and established connections are configured - 1.1
-       	run_test not_scored 1 three 3.3 3.3.11.2		#Ensure outbound and established connections are configured - 1.2
-	run_test nft_2 1 three 3.3 3.3.12.1 drop		#Ensure default deny firewall policy - 1.1
-	run_test chk_iptables 1 three 3.3 3.3.12.2 null 	#Ensure default deny firewall policy - 1.2
-	run_test is_enabled 1 three 3.3 3.3.13 nftables		#Ensure nftables service is enabled
-	run_test nftrul_perm 1 three 3.3 3.3.14			#Ensure nftables rules are permanent
-	run_test fwll_op 1 three 3.3 3.3.15			#Ensure firewall rules exist for all open ports
-	run_test chk_ip6tables 1 three 3.3 3.3.16		#Ensure IPV6 default deny firewall policy
-	run_test chk_ip6tables 1 three 3.3 3.3.17 loopback	#Ensure IPv6 default deny firewall policy
-	run_test not_scored 1 three 3.3 3.3.18			#Ensure IPv6 outbound and established connections are configured
-	run_test not_scored 1 three 3.3 3.3.19			#Ensure IPv6 firewall rules exists for all open ports
+	if [[ !("${excl_arr1[@]}" =~ "3.3") ]]; then
+		run_test fw_isinstall 1 three 3.3 3.3.0			#Ensure Firewall package is installed
+		run_test fw_chkenabled 1 three 3.3 3.3.1 firewalld	#Ensure firewalld service is enabled and running
+		run_test fw_chkenabled 1 three 3.3 3.3.2 nftables	#Ensure nftables is not enabled
+		run_test default_zone 1 three 3.3 3.3.3			#Ensure default zone is set
+		run_test not_scored 1 three 3.3 3.3.4			#Ensure unnecessary services and ports are not accepted
+		run_test not_scored 1 three 3.3 3.3.5			#Ensure network interface are assigned to appropriate zone
+		run_test fw_chkenabled 1 three 3.3 3.3.6 iptables	#Ensure iptables is not enabled
+		run_test not_scored 1 three 3.3 3.3.7			#Ensure iptables are flushed
+		run_test nft_1 1 three 3.3 3.3.8 tables			#Ensure a table exists
+		run_test nft_2 1 three 3.3 3.3.9 	 		#Ensure base chains exist
+		run_test nft_3 1 three 3.3 3.3.10.1			#Ensure loopback traffic is configured - 1.1
+		run_test chk_iptables 1 three 3.3 3.3.10.2 loopback 	#Ensure loopback traffic is configured - 1.2
+		run_test not_scored 1 three 3.3 3.3.11.1		#Ensure outbound and established connections are configured - 1.1
+       		run_test not_scored 1 three 3.3 3.3.11.2		#Ensure outbound and established connections are configured - 1.2
+		run_test nft_2 1 three 3.3 3.3.12.1 drop		#Ensure default deny firewall policy - 1.1
+		run_test chk_iptables 1 three 3.3 3.3.12.2 null 	#Ensure default deny firewall policy - 1.2
+		run_test is_enabled 1 three 3.3 3.3.13 nftables		#Ensure nftables service is enabled
+		run_test nftrul_perm 1 three 3.3 3.3.14			#Ensure nftables rules are permanent
+		run_test fwll_op 1 three 3.3 3.3.15			#Ensure firewall rules exist for all open ports
+		run_test chk_ip6tables 1 three 3.3 3.3.16		#Ensure IPV6 default deny firewall policy
+		run_test chk_ip6tables 1 three 3.3 3.3.17 loopback	#Ensure IPv6 default deny firewall policy
+		run_test not_scored 1 three 3.3 3.3.18			#Ensure IPv6 outbound and established connections are configured
+		run_test not_scored 1 three 3.3 3.3.19			#Ensure IPv6 firewall rules exists for all open ports
+	fi
 
 	#catg: wireless configuration
-	run_test wifi_config 1 three 3.4 3.4.0			#Ensure wireless interfaces are disabled
+	if [[ !("${excl_arr1[@]}" =~ "3.4") ]]; then
+		run_test wifi_config 1 three 3.4 3.4.0			#Ensure wireless interfaces are disabled
+	fi
 
 	#----------------------------------#
 	#chp. 4 LOGGING AND AUDITING
 	#catg: configure logging
-	run_test chkpkg_installed 1 four 4.1 4.1.0 rsyslog 1	#Ensure rsyslog is installed
-	run_test is_enabled 1 four 4.1 4.1.1 rsyslog		#Ensure rsyslog service is enabled
-	run_test rsyslog_perm 1 four 4.1 4.1.2 			#Ensure rsyslog default file permissions configured
-	run_test not_scored 1 four 4.1 4.1.3			#Ensure logging is configured
-	run_test send_log 1 four 4.1 4.1.4			#Ensure rsyslog is configured to send logs to a remoate log host
-	run_test not_scored 1 four 4.1 4.1.5			#Ensure remote rsyslog messages are only accepted on designated log hosts
-	run_test journald_cfg 1 four 4.1 4.1.6			#Ensure journald is configured to send logs to rsyslog
-	run_test journald_cfg 1 four 4.1 4.1.7			#Ensure journald is configured to compress large log files
-	run_test journald_cfg 1 four 4.1 4.1.8 			#Ensure journald is configured to write logfiles to persistent disk
+	if [[ !("${excl_arr1[@]}" =~ "4.1") ]]; then
+		run_test chkpkg_installed 1 four 4.1 4.1.0 rsyslog 1	#Ensure rsyslog is installed
+		run_test is_enabled 1 four 4.1 4.1.1 rsyslog		#Ensure rsyslog service is enabled
+		run_test rsyslog_perm 1 four 4.1 4.1.2 			#Ensure rsyslog default file permissions configured
+		run_test not_scored 1 four 4.1 4.1.3			#Ensure logging is configured
+		run_test send_log 1 four 4.1 4.1.4			#Ensure rsyslog is configured to send logs to a remoate log host
+		run_test not_scored 1 four 4.1 4.1.5			#Ensure remote rsyslog messages are only accepted on designated log hosts
+		run_test journald_cfg 1 four 4.1 4.1.6			#Ensure journald is configured to send logs to rsyslog
+		run_test journald_cfg 1 four 4.1 4.1.7			#Ensure journald is configured to compress large log files
+		run_test journald_cfg 1 four 4.1 4.1.8 			#Ensure journald is configured to write logfiles to persistent disk
+	fi
 	
 	#catg: log rotation
-	run_test not_scored 1 four 4.2 4.2.0			#Ensure logrotate is configured
+	if [[ !("${excl_arr1[@]}" =~ "4.2") ]]; then
+		run_test not_scored 1 four 4.2 4.2.0			#Ensure logrotate is configured
+	fi
 
 	#----------------------------------#
 	#chp. 5 ACCESS, AUTHENTICATION AND AUTHORIZATION
 	#catg: configure cron
-	run_test is_enabled 1 five 5.1 5.1.0 crond		#Ensure cron daemon is enabled
-	run_test cron_perm1 1 five 5.1 5.1.1 tab		#Ensure permissions on /etc/crontab are configured
-	run_test cron_perm1 1 five 5.1 5.1.2 .hourly		#Ensure permissions on /etc/cron.hourly are configured
-	run_test cron_perm1 1 five 5.1 5.1.3 .daily		#Ensure permissions on /etc/cron.daily are configured
-	run_test cron_perm1 1 five 5.1 5.1.4 .weekly		#Ensure permissions on /etc/cron.weekly are configured
-	run_test cron_perm1 1 five 5.1 5.1.5 .monthly		#Ensure permissions on /etc/cron.monthly are configured
-	run_test cron_perm1 1 five 5.1 5.1.6 .d			#Enusre permissions on /etc/cron.d are configured
-	run_test cron_perm2 1 five 5.1 5.1.7			#Ensure at /cron is restricted to authorized users
+	if [[ !("${excl_arr1[@]}" =~ "5.1") ]]; then
+		run_test is_enabled 1 five 5.1 5.1.0 crond		#Ensure cron daemon is enabled
+		run_test cron_perm1 1 five 5.1 5.1.1 tab		#Ensure permissions on /etc/crontab are configured
+		run_test cron_perm1 1 five 5.1 5.1.2 .hourly		#Ensure permissions on /etc/cron.hourly are configured
+		run_test cron_perm1 1 five 5.1 5.1.3 .daily		#Ensure permissions on /etc/cron.daily are configured
+		run_test cron_perm1 1 five 5.1 5.1.4 .weekly		#Ensure permissions on /etc/cron.weekly are configured
+		run_test cron_perm1 1 five 5.1 5.1.5 .monthly		#Ensure permissions on /etc/cron.monthly are configured
+		run_test cron_perm1 1 five 5.1 5.1.6 .d			#Enusre permissions on /etc/cron.d are configured
+		run_test cron_perm2 1 five 5.1 5.1.7			#Ensure at /cron is restricted to authorized users
+	fi
 
 	#catg: ssh server configuration
-	run_test ssh_perm 1 five 5.2 5.2.0			#Ensure permissions on /etc/ssh/sshd_config are configured
-	run_test ssh_cfg_3 1 five 5.2 5.2.1			#Ensure SSH access is limited
-	run_test ssh_key_config 1 five 5.2 5.2.2 0		#Ensure permissions on SSH private host key files are configured
-	run_test ssh_key_config 1 five 5.2 5.2.3 1		#Ensure permissions on SSH public host key files are configured
-	run_test ssh_cfg_1 1 five 5.2 5.2.4 loglevel "(INFO|VERBOSE)"   #Ensure SSH LogLevel is appropriate
-	run_test ssh_cfg_1 1 five 5.2 5.2.5 x11forwarding no		#Ensure SSH X11 forwarding is disabled
-	run_test ssh_cfg_1 1 five 5.2 5.2.6 maxauthtries "[1-4]"	#Ensure SSH MaxAuthTries is set to 4 or less
-	run_test ssh_cfg_1 1 five 5.2 5.2.7 ignorerhosts yes		#Ensure SSH IgnoreRhost is enabled
-	run_test ssh_cfg_1 1 five 5.2 5.2.8 hostbasedauthentication no	#Ensure SSH HostbasedAuthentication is disabled
-	run_test ssh_cfg_1 1 five 5.2 5.2.9 permitrootlogin no		#Ensure SSH root login is disabled
-	run_test ssh_cfg_1 1 five 5.2 5.2.10 permitemptypasswords no	#Ensure SSH PermitEmptyPasswords is disabled
-	run_test ssh_cfg_1 1 five 5.2 5.2.11 permituserenvironment no	#Ensure SSH PermitUserEnvironment is disabled
-	run_test ssh_cfg_2 1 five 5.2 5.2.12 clientaliveinternal clientalivecountmax 300 0	#Ensure SSH Idle Timeout Interval is configured
-	run_test ssh_cfg_1 1 five 5.2 5.2.13 logingracetime "[1-60]"	#Ensure SSH LoginGraceTime is set to one minute or less
-	run_test ssh_cfg_1 1 five 5.2 5.2.14 banner issue.net		#Ensure SSH warnning banner is configured
-	run_test ssh_cfg_1 1 five 5.2 5.2.15 usepam yes			#Ensure SSH PAM is enabled
-	run_test ssh_cfg_1 1 five 5.2 5.2.16 maxstartups 10:30:60	#Ensure SSH MaxStartups is configured
-	run_test ssh_cfg_1 1 five 5.2 5.2.17 maxsessions "[1-4]"	#Ensure SSH MaxSessions is set to 4 or less
-	run_test ssh_crypto 1 five 5.2 5.2.18			#Ensure system-wide crypto policy is not over-ridden
+	if [[ !("${excl_arr1[@]}" =~ "5.2") ]]; then
+		run_test ssh_perm 1 five 5.2 5.2.0			#Ensure permissions on /etc/ssh/sshd_config are configured
+		run_test ssh_cfg_3 1 five 5.2 5.2.1			#Ensure SSH access is limited
+		run_test ssh_key_config 1 five 5.2 5.2.2 0		#Ensure permissions on SSH private host key files are configured
+		run_test ssh_key_config 1 five 5.2 5.2.3 1		#Ensure permissions on SSH public host key files are configured
+		run_test ssh_cfg_1 1 five 5.2 5.2.4 loglevel "(INFO|VERBOSE)"   #Ensure SSH LogLevel is appropriate
+		run_test ssh_cfg_1 1 five 5.2 5.2.5 x11forwarding no		#Ensure SSH X11 forwarding is disabled
+		run_test ssh_cfg_1 1 five 5.2 5.2.6 maxauthtries "[1-4]"	#Ensure SSH MaxAuthTries is set to 4 or less
+		run_test ssh_cfg_1 1 five 5.2 5.2.7 ignorerhosts yes		#Ensure SSH IgnoreRhost is enabled
+		run_test ssh_cfg_1 1 five 5.2 5.2.8 hostbasedauthentication no	#Ensure SSH HostbasedAuthentication is disabled
+		run_test ssh_cfg_1 1 five 5.2 5.2.9 permitrootlogin no		#Ensure SSH root login is disabled
+		run_test ssh_cfg_1 1 five 5.2 5.2.10 permitemptypasswords no	#Ensure SSH PermitEmptyPasswords is disabled
+		run_test ssh_cfg_1 1 five 5.2 5.2.11 permituserenvironment no	#Ensure SSH PermitUserEnvironment is disabled
+		run_test ssh_cfg_2 1 five 5.2 5.2.12 clientaliveinternal clientalivecountmax 300 0	#Ensure SSH Idle Timeout Interval is configured
+		run_test ssh_cfg_1 1 five 5.2 5.2.13 logingracetime "[1-60]"	#Ensure SSH LoginGraceTime is set to one minute or less
+		run_test ssh_cfg_1 1 five 5.2 5.2.14 banner issue.net		#Ensure SSH warnning banner is configured
+		run_test ssh_cfg_1 1 five 5.2 5.2.15 usepam yes			#Ensure SSH PAM is enabled
+		run_test ssh_cfg_1 1 five 5.2 5.2.16 maxstartups 10:30:60	#Ensure SSH MaxStartups is configured
+		run_test ssh_cfg_1 1 five 5.2 5.2.17 maxsessions "[1-4]"	#Ensure SSH MaxSessions is set to 4 or less
+		run_test ssh_crypto 1 five 5.2 5.2.18			#Ensure system-wide crypto policy is not over-ridden
+	fi
 
 	#catg: configure authselect
-	run_test auth_custom 1 five 5.3 5.3.0			#Create custom authselect profile
-       	run_test auth_profile 1 five 5.3 5.3.1			#Select authselect profile
-	run_test auth_flck 1 five 5.3 5.3.2			#Ensure authselect includes with-faillock
+	if [[ !("${excl_arr1[@]}" =~ "5.3") ]]; then
+		run_test auth_custom 1 five 5.3 5.3.0			#Create custom authselect profile
+       		run_test auth_profile 1 five 5.3 5.3.1			#Select authselect profile
+		run_test auth_flck 1 five 5.3 5.3.2			#Ensure authselect includes with-faillock
+	fi
 
 	#catg: configure pam	
-	run_test pam_config 1 five 5.4 5.4.0			#Ensure password creation requirements are configured
-	run_test pam_config 1 five 5.4 5.4.1			#Ensure lockout for failed password attempts is configured
-	run_test pam_config 1 five 5.4 5.4.2			#Ensure password reuse is limited
-	run_test pam_config 1 five 5.4 5.4.3			#Ensure password hashing algorithm is SHA-512
+	if [[ !("${excl_arr1[@]}" =~ "5.4") ]]; then
+		run_test pam_config 1 five 5.4 5.4.0			#Ensure password creation requirements are configured
+		run_test pam_config 1 five 5.4 5.4.1			#Ensure lockout for failed password attempts is configured
+		run_test pam_config 1 five 5.4 5.4.2			#Ensure password reuse is limited
+		run_test pam_config 1 five 5.4 5.4.3			#Ensure password hashing algorithm is SHA-512
+	fi
 
 	#catg: user accounts and environment
-	run_test uae_cfg 1 five 5.5 5.5.0 PASS_MAX_DAYS 365 5	#Ensure password expiration is 365 days or less
-	run_test uae_cfg 1 five 5.5 5.5.1 PASS_MIN_DAYS 7 4	#Ensure minimum days between password changes is 7 or more 
-	run_test uae_cfg 1 five 5.5 5.5.2 PASS_WARN_AGE 7 6	#Ensure password expiration warning days is 7 or more 
-	run_test uae_cfg 1 five 5.5 5.5.3 INACTIVE 30 7		#Ensure inactive password lock is 30 days or less
-	run_test pwd_cfg 1 five 5.5 5.5.4			#Ensure all users last password change date is in the past
-	run_test sysacc_secured	1 five 5.5 5.5.5		#Ensure system accounts are secured
-	run_test def_usr_shell 1 five 5.5 5.5.6			#Ensure default user shell timeout is 900 seconds or less
-	run_test def_grp_access 1 five 5.5 5.5.7		#Ensure default group for the root account is GID 0
-	run_test def_usr_umask 1 five 5.5 5.5.8			#Ensure default user umake is 027 or more restrictive
+	if [[ !("${excl_arr1[@]}" =~ "5.5") ]]; then
+		run_test uae_cfg 1 five 5.5 5.5.0 PASS_MAX_DAYS 365 5	#Ensure password expiration is 365 days or less
+		run_test uae_cfg 1 five 5.5 5.5.1 PASS_MIN_DAYS 7 4	#Ensure minimum days between password changes is 7 or more 
+		run_test uae_cfg 1 five 5.5 5.5.2 PASS_WARN_AGE 7 6	#Ensure password expiration warning days is 7 or more 
+		run_test uae_cfg 1 five 5.5 5.5.3 INACTIVE 30 7		#Ensure inactive password lock is 30 days or less
+		run_test pwd_cfg 1 five 5.5 5.5.4			#Ensure all users last password change date is in the past
+		run_test sysacc_secured	1 five 5.5 5.5.5		#Ensure system accounts are secured
+		run_test def_usr_shell 1 five 5.5 5.5.6			#Ensure default user shell timeout is 900 seconds or less
+		run_test def_grp_access 1 five 5.5 5.5.7		#Ensure default group for the root account is GID 0
+		run_test def_usr_umask 1 five 5.5 5.5.8			#Ensure default user umake is 027 or more restrictive
+	fi
 	
 	#catg: root login configuration
-	run_test not_scored 1 five 5.6 5.6.0			#Ensure root login is restricted to system console
+	if [[ !("${excl_arr1[@]}" =~ "5.6") ]]; then
+		run_test not_scored 1 five 5.6 5.6.0			#Ensure root login is restricted to system console
+	fi
 	
 	#catg: su command
-	run_test su_access 1 five 5.7 5.7.0			#Ensure access to su command is restricted
+	if [[ !("${excl_arr1[@]}" =~ "5.7") ]]; then
+		run_test su_access 1 five 5.7 5.7.0			#Ensure access to su command is restricted
+	fi
 
 	#----------------------------------#
 	#chp. 6 SYSTEM MAINTENANCE
 	#catg: system file permissions
-	run_test file_perm 1 six 6.1 6.1.0 /etc/passwd 0644		#Ensure permissions on /etc/passwd are configured
-	run_test file_perm 1 six 6.1 6.1.1 /etc/shadow "0[0-6][0|4]0"	#Ensure permissions on /etc/shadow are configured
-	run_test file_perm 1 six 6.1 6.1.2 /etc/group 0644		#Ensure permissions on /etc/group are configured
-	run_test file_perm 1 six 6.1 6.1.3 /etc/gshadow "0[0-6][0|4]0"	#Ensure permissions on /etc/gshadow are configured
-	run_test file_perm 1 six 6.1 6.1.4 /etc/passwd-	"0[0-6]00"	#Ensure permissions on /etc/passwd- are configured
-       	run_test file_perm 1 six 6.1 6.1.5 /etc/shadow- "0[0-6][0|4]0"	#Ensure permissions on /etc/shadow- are configured
-	run_test file_perm 1 six 6.1 6.1.6 /etc/group- "0[0-6][0|4][0|4]" #Ensure permissions on /etc/group- are configured
-	run_test file_perm 1 six 6.1 6.1.7 /etc/gshadow- "0[0-6][0|4]0"	#Ensure permissions on /etc/gshadow- are configured
-	run_test no_exist 1 six 6.1 6.1.8 			#Ensure no world writable files exist
-	run_test no_exist 1 six 6.1 6.1.9 			#Ensure no unowned file or directories exist
-	run_test no_exist 1 six 6.1 6.1.10 			#Ensure no ungrouped files or directories exist
-	run_test not_scored 1 six 6.1 6.1.11			#Audit SUID executables
-	run_test not_scored 1 six 6.1 6.1.12			#Audit SGID executables
+	if [[ !("${excl_arr1[@]}" =~ "6.1") ]]; then
+		run_test file_perm 1 six 6.1 6.1.0 /etc/passwd 0644		#Ensure permissions on /etc/passwd are configured
+		run_test file_perm 1 six 6.1 6.1.1 /etc/shadow "0[0-6][0|4]0"	#Ensure permissions on /etc/shadow are configured
+		run_test file_perm 1 six 6.1 6.1.2 /etc/group 0644		#Ensure permissions on /etc/group are configured
+		run_test file_perm 1 six 6.1 6.1.3 /etc/gshadow "0[0-6][0|4]0"	#Ensure permissions on /etc/gshadow are configured
+		run_test file_perm 1 six 6.1 6.1.4 /etc/passwd-	"0[0-6]00"	#Ensure permissions on /etc/passwd- are configured
+       		run_test file_perm 1 six 6.1 6.1.5 /etc/shadow- "0[0-6][0|4]0"	#Ensure permissions on /etc/shadow- are configured
+		run_test file_perm 1 six 6.1 6.1.6 /etc/group- "0[0-6][0|4][0|4]" #Ensure permissions on /etc/group- are configured
+		run_test file_perm 1 six 6.1 6.1.7 /etc/gshadow- "0[0-6][0|4]0"	#Ensure permissions on /etc/gshadow- are configured
+		run_test no_exist 1 six 6.1 6.1.8 			#Ensure no world writable files exist
+		run_test no_exist 1 six 6.1 6.1.9 			#Ensure no unowned file or directories exist
+		run_test no_exist 1 six 6.1 6.1.10 			#Ensure no ungrouped files or directories exist
+		run_test not_scored 1 six 6.1 6.1.11			#Audit SUID executables
+		run_test not_scored 1 six 6.1 6.1.12			#Audit SGID executables
+	fi
 
 	#catg: user and group settings
-	run_test fn_6.2.0 1 six 6.2 6.2.0			#Ensure password fields are not empty
-	run_test no_legacy 1 six 6.2 6.2.1 /etc/passwd		#Ensure no legacy "+" entries exist in /etc/passwd
-	run_test fn_6.2.2 1 six 6.2 6.2.2			#Ensure root PATH Integrity 
-	run_test no_legacy 1 six 6.2 6.2.3 /etc/shadow		#Enusre no legacy "+" entries exist in /etc/shadow
-	run_test no_legacy 1 six 6.2 6.2.4 /etc/group		#Ensure no legacy "+" entries exist in /etc/group
-	run_test fn_6.2.5 1 six 6.2 6.2.5			#Ensure root is the only UID 0 account
-	run_test fn_6.2.6 1 six 6.2 6.2.6			#Ensure user's home directories permissions are 750 or more restrictive
-	run_test fn_6.2.7 1 six 6.2 6.2.7			#Ensure users own their home directories
-	run_test fn_6.2.8 1 six 6.2 6.2.8			#Ensure user's odt files are not group or world writable
-	run_test fn_6.2.9 1 six 6.2 6.2.9			#Ensure no users have .forward files
-	run_test fn_6.2.10 1 six 6.2 6.2.10			#Ensure no users have .netrc files
-	run_test fn_6.2.11 1 six 6.2 6.2.11			#Ensure user's netrc file are not group or world accessible
-	run_test fn_6.2.12 1 six 6.2 6.2.12			#Ensure no users have .rhosts files
-	run_test fn_6.2.13 1 six 6.2 6.2.13			#Ensure all groups in /etc/passwd exist in /etc/group
-	run_test fn_6.2.x 1 six 6.2 6.2.14 /etc/passwd 3	#Enusre no duplicate UIDs exist	
-	run_test fn_6.2.x 1 six 6.2 6.2.15 /etc/group 3		#Ensure no duplicate GIDs exist
-	run_test fn_6.2.x 1 six 6.2 6.2.16 /etc/passwd 1	#Ensure no duplicate user names exist
-	run_test fn_6.2.x 1 six 6.2 6.2.17 /etc/group 1		#Ensure no duplicate group names exist
-	run_test fn_6.2.18 1 six 6.2 6.2.18			#Ensure shadow group is empty
-	run_test fn_6.2.19 1 six 6.2 6.2.19			#Ensure all user's home directories exist
+	if [[ !("${excl_arr1[@]}" =~ "6.2") ]]; then
+		run_test fn_6.2.0 1 six 6.2 6.2.0			#Ensure password fields are not empty
+		run_test no_legacy 1 six 6.2 6.2.1 /etc/passwd		#Ensure no legacy "+" entries exist in /etc/passwd
+		run_test fn_6.2.2 1 six 6.2 6.2.2			#Ensure root PATH Integrity 
+		run_test no_legacy 1 six 6.2 6.2.3 /etc/shadow		#Enusre no legacy "+" entries exist in /etc/shadow
+		run_test no_legacy 1 six 6.2 6.2.4 /etc/group		#Ensure no legacy "+" entries exist in /etc/group
+		run_test fn_6.2.5 1 six 6.2 6.2.5			#Ensure root is the only UID 0 account
+		run_test fn_6.2.6 1 six 6.2 6.2.6			#Ensure user's home directories permissions are 750 or more restrictive
+		run_test fn_6.2.7 1 six 6.2 6.2.7			#Ensure users own their home directories
+		run_test fn_6.2.8 1 six 6.2 6.2.8			#Ensure user's odt files are not group or world writable
+		run_test fn_6.2.9 1 six 6.2 6.2.9			#Ensure no users have .forward files
+		run_test fn_6.2.10 1 six 6.2 6.2.10			#Ensure no users have .netrc files
+		run_test fn_6.2.11 1 six 6.2 6.2.11			#Ensure user's netrc file are not group or world accessible
+		run_test fn_6.2.12 1 six 6.2 6.2.12			#Ensure no users have .rhosts files
+		run_test fn_6.2.13 1 six 6.2 6.2.13			#Ensure all groups in /etc/passwd exist in /etc/group
+		run_test fn_6.2.x 1 six 6.2 6.2.14 /etc/passwd 3	#Enusre no duplicate UIDs exist	
+		run_test fn_6.2.x 1 six 6.2 6.2.15 /etc/group 3		#Ensure no duplicate GIDs exist
+		run_test fn_6.2.x 1 six 6.2 6.2.16 /etc/passwd 1	#Ensure no duplicate user names exist
+		run_test fn_6.2.x 1 six 6.2 6.2.17 /etc/group 1		#Ensure no duplicate group names exist
+		run_test fn_6.2.18 1 six 6.2 6.2.18			#Ensure shadow group is empty
+		run_test fn_6.2.19 1 six 6.2 6.2.19			#Ensure all user's home directories exist
+	fi
 
-
+fi
 
 
 	##########################################################################################
 	##########################################################################################
+
+if [[ $lvl -eq 2 ]] || [[ $all -eq 1 ]]
+then
 
 	##--LEVEL 2--##
 	#chp. 1 INITIAL SETUP
 	#catg: filesystem
-	run_test not_scored 2 one 1.1 1.1.0			#Ensure mounting of vFAT filesystem is limited
-	run_test chk_partition 2 one 1.1 1.1.1 /var		#Ensure separate partition exists for /var
-       	run_test chk_partition 2 one 1.1 1.1.2 /var/tmp		#Ensure separate partition exists for /var/tmp
-	run_test chk_partition 2 one 1.1 1.1.3 /var/log/audit 	#Ensure separate partition exists for /var/log/audit
-	run_test chk_partition 2 one 1.1 1.1.4 /home		#Ensure separate partition exists for /home
-	run_test is_disabled 2 one 1.1 1.1.5 usb-storage	#Disable USB Storage	
+	if [[ !("${excl_arr2[@]}" =~ "1.1") ]]; then
+		run_test not_scored 2 one 1.1 1.1.0			#Ensure mounting of vFAT filesystem is limited
+		run_test chk_partition 2 one 1.1 1.1.1 /var		#Ensure separate partition exists for /var
+	       	run_test chk_partition 2 one 1.1 1.1.2 /var/tmp		#Ensure separate partition exists for /var/tmp
+		run_test chk_partition 2 one 1.1 1.1.3 /var/log/audit 	#Ensure separate partition exists for /var/log/audit
+		run_test chk_partition 2 one 1.1 1.1.4 /home		#Ensure separate partition exists for /home
+		run_test is_disabled 2 one 1.1 1.1.5 usb-storage	#Disable USB Storage	
+	fi
 	
 	#catg: MAC
-	run_test chkpkg_installed 2 one 1.2 1.2.0 libselinux 1	#Ensure SELinux is installed
-	run_test selinux_bootloader 2 one 1.2 1.2.1		#Ensure SELinux is not disable in bootloader configuration
-	run_test selinux_config 2 one 1.2 1.2.2			#Ensure SELinux policy is configured
-	run_test selinux_config 2 one 1.2 1.2.3			#Ensure the SELinux state is enforcing
-	run_test unconfn_srv 2 one 1.2 1.2.4			#Ensure no unconfined services exist
-	run_test chkpkg_installed 2 one 1.2 1.2.5 setroubleshoot 0 #Ensure SETroubleshoot is not installed
-	run_test chkpkg_installed 2 one 1.2 1.2.6 mcstrans 0	#Ensure the MCS Translation Services (mcstrans) is not installed
-	run_test crypto_policy 2 one 1.3 1.3.0 0		#Ensure system-wide crypto policy is FUTURE or FIPS
+	if [[ !("${excl_arr2[@]}" =~ "1.2") ]]; then
+		run_test chkpkg_installed 2 one 1.2 1.2.0 libselinux 1	#Ensure SELinux is installed
+		run_test selinux_bootloader 2 one 1.2 1.2.1		#Ensure SELinux is not disable in bootloader configuration
+		run_test selinux_config 2 one 1.2 1.2.2			#Ensure SELinux policy is configured
+		run_test selinux_config 2 one 1.2 1.2.3			#Ensure the SELinux state is enforcing
+		run_test unconfn_srv 2 one 1.2 1.2.4			#Ensure no unconfined services exist
+		run_test chkpkg_installed 2 one 1.2 1.2.5 setroubleshoot 0 #Ensure SETroubleshoot is not installed
+		run_test chkpkg_installed 2 one 1.2 1.2.6 mcstrans 0	#Ensure the MCS Translation Services (mcstrans) is not installed
+		run_test crypto_policy 2 one 1.3 1.3.0 0		#Ensure system-wide crypto policy is FUTURE or FIPS
+	fi
 
 	#----------------------------------#
 	#chp. 3 NETWORK CONFIGURATION
 	#catg: uncommon network protocol
-	run_test is_disabled 2 three 3.1 3.1.0 dccp		#Ensure DCCP is disabled
-	run_test is_disabled 2 three 3.1 3.1.1 sctp		#Ensure SCTP is disabled
-	run_test is_disabled 2 three 3.1 3.1.2 rds		#Ensure RDS is disabled
-	run_test is_disabled 2 three 3.1 3.1.3 tipc		#Ensure TIPC is disabled 
+	if [[ !("${excl_arr2[@]}" =~ "3.1") ]]; then
+		run_test is_disabled 2 three 3.1 3.1.0 dccp		#Ensure DCCP is disabled
+		run_test is_disabled 2 three 3.1 3.1.1 sctp		#Ensure SCTP is disabled
+		run_test is_disabled 2 three 3.1 3.1.2 rds		#Ensure RDS is disabled
+		run_test is_disabled 2 three 3.1 3.1.3 tipc		#Ensure TIPC is disabled 
+	fi
 
 	#catg: wireless configuration
-	run_test wifi_config 2 three 3.2 3.2.0			#Ensure wireless interfaces are disabled
+	if [[ !("${excl_arr2[@]}" =~ "3.2") ]]; then
+		run_test wifi_config 2 three 3.2 3.2.0			#Ensure wireless interfaces are disabled
+	fi
 
 	#catg: disable ipv6
-	run_test not_scored 2 three 3.3 3.3.0			#Disable IPv6
+	if [[ !("${excl_arr2[@]}" =~ "3.3") ]]; then
+		run_test not_scored 2 three 3.3 3.3.0			#Disable IPv6
+	fi
 
 	#----------------------------------#
 	#chp. 4 LOGGING AND AUDITING
 	#catg: configure system accounting
-	run_test chkpkg_installed 2 four 4.1 4.1.0 "audit audit-libs" 1 #Ensure auditd is installed
-	run_test is_enabled 2 four 4.1 4.1.1 auditd			#Ensure auditd service is enabled
-	run_test audit_proc 2 four 4.1 4.1.2 "audit=1"			#Ensure auditing for processes that start prior to auditd
-	run_test audit_proc 2 four 4.1 4.1.3 "audit_backlog_limit=\S+"  #Ensure audit_backlog_limit is sufficient
-	run_test audit_conf1 2 four 4.1 4.1.4 max_log_file		#Ensure audit log storage size is configured
-	run_test audit_conf1 2 four 4.1 4.1.5 max_log_file_action	#Ensure audit log storage size is configured
-	run_test audit_conf1 2 four 4.1 4.1.6 				#Ensure system is disabled when audit logs are full
+	if [[ !("${excl_arr2[@]}" =~ "4.1") ]]; then
+		run_test chkpkg_installed 2 four 4.1 4.1.0 "audit audit-libs" 1 #Ensure auditd is installed
+		run_test is_enabled 2 four 4.1 4.1.1 auditd			#Ensure auditd service is enabled
+		run_test audit_proc 2 four 4.1 4.1.2 "audit=1"			#Ensure auditing for processes that start prior to auditd
+		run_test audit_proc 2 four 4.1 4.1.3 "audit_backlog_limit=\S+"  #Ensure audit_backlog_limit is sufficient
+		run_test audit_conf1 2 four 4.1 4.1.4 max_log_file		#Ensure audit log storage size is configured
+		run_test audit_conf1 2 four 4.1 4.1.5 max_log_file_action	#Ensure audit log storage size is configured
+		run_test audit_conf1 2 four 4.1 4.1.6 				#Ensure system is disabled when audit logs are full
 
-	run_test audit_conf2 2 four 4.1 4.1.9 "'(session|logins)'" 1	#Ensure session initiation information is collected
-	run_test audit_conf2 2 four 4.1 4.1.10 time-change 0		#Ensure events that modify date and time information are collected
-	run_test audit_conf2 2 four 4.1 4.1.11 MAC-policy 0		#Ensure events that modify the system's Mandotry Access Controls are collected
-	run_test audit_conf2 2 four 4.1 4.1.12 system-locale 0		#Ensure events that modify the system's network environment are collected
-	run_test audit_conf2 2 four 4.1 4.1.13 perm_mod 0		#Ensure discretionary access control permission modification events are collected
-	run_test audit_conf2 2 four 4.1 4.1.14 access 0			#Ensure unsuccessful unauthorized file access attempts are collected
-	run_test audit_conf2 2 four 4.1 4.1.15 identity 0		#Ensure events that modify user/group information are collected
-	run_test audit_conf2 2 four 4.1 4.1.16 mounts 0			#Ensure successful file system mounts are collected
-	run_test pcmd 2 four 4.1 4.1.17					#Ensure use of privileged commands is collected
-	run_test audit_conf2 2 four 4.1 4.1.18 delete 0			#Ensure file deletion events by users are collected
-	run_test audit_conf2 2 four 4.1 4.1.19 modules			#Ensure kernel module loading and unloading is collected
-	run_test sulog_chk 2 four 4.1 4.1.20				#Ensure system administrator actions (sudolog) are collected
-	run_test audit_conf3 2 four 4.1 4.1.21				#Ensure the audit configuration is immutable
+		run_test audit_conf2 2 four 4.1 4.1.9 "'(session|logins)'" 1	#Ensure session initiation information is collected
+		run_test audit_conf2 2 four 4.1 4.1.10 time-change 0		#Ensure events that modify date and time information are collected
+		run_test audit_conf2 2 four 4.1 4.1.11 MAC-policy 0		#Ensure events that modify the system's Mandotry Access Controls are collected
+		run_test audit_conf2 2 four 4.1 4.1.12 system-locale 0		#Ensure events that modify the system's network environment are collected
+		run_test audit_conf2 2 four 4.1 4.1.13 perm_mod 0		#Ensure discretionary access control permission modification events are collected
+		run_test audit_conf2 2 four 4.1 4.1.14 access 0			#Ensure unsuccessful unauthorized file access attempts are collected
+		run_test audit_conf2 2 four 4.1 4.1.15 identity 0		#Ensure events that modify user/group information are collected
+		run_test audit_conf2 2 four 4.1 4.1.16 mounts 0			#Ensure successful file system mounts are collected
+		run_test pcmd 2 four 4.1 4.1.17					#Ensure use of privileged commands is collected
+		run_test audit_conf2 2 four 4.1 4.1.18 delete 0			#Ensure file deletion events by users are collected
+		run_test audit_conf2 2 four 4.1 4.1.19 modules			#Ensure kernel module loading and unloading is collected
+		run_test sulog_chk 2 four 4.1 4.1.20				#Ensure system administrator actions (sudolog) are collected
+		run_test audit_conf3 2 four 4.1 4.1.21				#Ensure the audit configuration is immutable
+	fi
 
 	#----------------------------------#
 	#chp. 5 ACCESS, AUTHENTICATION AND AUTHORIZATION
-	run_test ssh_cfg_1 2 five 5.1 5.1.0 allowtcpforwarding no	#Ensure SSH AllowTcpForwarding is disabled
+	if [[ !("${excl_arr2[@]}" =~ "5.1") ]]; then
+		run_test ssh_cfg_1 2 five 5.1 5.1.0 allowtcpforwarding no	#Ensure SSH AllowTcpForwarding is disabled
+	fi
 	
 	#----------------------------------#
 	#chp. 6 SYSTEM MAINTENANCE
-	run_test not_scored 2 six 6.1 6.1.0			#Audit system file permissions
-
-
-	rename "$JSN_DIR" "$JSN_FIL"
-	echo "Done..."
-
-	write_info "Audit Test is done"
-	write_info "Script exited"
-else
-	display
+	if [[ !("${excl_arr2[@]}" =~ "6.1") ]]; then
+		run_test not_scored 2 six 6.1 6.1.0			#Audit system file permissions
+	fi
 fi
 
+rename "$JSN_DIR" "$JSN_FIL"
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+write_info "Audit Test is done"
+write_info "Script exited"
+echo "Done..."
+unset excl_arr1
+unset excl_arr2
