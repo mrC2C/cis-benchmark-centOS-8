@@ -10,14 +10,33 @@ Auditing Script based on CIS-BENCHMARK CENTOS 8 v1.0.0
 #### Permission granted to the script:
      chmod 750 cis-benchmark-centOS-8/centOS8.sh
      
+#### Options:
+     OPTIONS: 
+        -h,     --help          Display the help message
+        -ls,    --list
+        -l,     --level         Indicate the level 1 or 2 for server/workstation to audit
+        -e,     --exclude       Indicate the level and categories id to be excluded from auditingi. 
+                                FORMAT: LEVEL.CAT_ID meaning level first followed by categories id
+                                e.g. 1.1.1  ==> meaning exclude level 1 and categories id 1.1 
+        -vv,    --verbose       Display the debug file, while the script is running
+
+     EXAMPLE:
+        sudo ./centOS8.sh -e 1.1.1,2.1.1 -vv    #Execute the script to audit only LEVEL 1 but exclude categories id 1.1
+        sudo ./centOS8.sh -l 1 -e 1.2.1,1.6.1 -vv
+        sudo ./centOS8.sh -l 2 -e 2.1.1, 2.3.1 -vv
+        
 #### Run:
       cd cis-benchmark-centOS-8/
-      sudo ./centOS8.sh
+      sudo ./centOS8.sh -vv       #If you want to run everything in verbose mode
       
 ## Note:
- Hi all, this is my first time creating a project on GITHUB. Since, this is my first time doing such project, I would like to ask you guys to help me check it out. Feel free to send feedback on what to improve on or add any new features.
+Hi all, this is my first time creating a project on GITHUB. Since, this is my first time doing such project, I would like to ask you guys to help me check it out. Feel free to send feedback on what to improve on or add any new features.
  
- Do note that the script will take a while to complete due to the execution of function 'no_exist' as it has to go through multiple checks, thus compared to other function, 'no_exist' function takes quite a while to complete. 
+Do note that function 'no_exist' will take a while due to the number of checks it need to process. 
  
 ## UPDATES:
- I will be adding new features to the script such as displaying the json data and adding options to the script. So stay tune :)
+#### What's new?
+     There are options available for the script, from indicating what level you want to audit at and also what categories id you want to exclude.
+     Also, there is a verbose option -vv where debug file will display all the revelant information  e.g. the function executed in the script.
+     
+ 
