@@ -35,8 +35,8 @@ Hi all, this is my first time creating a project on GITHUB. Since, this is my fi
 Do note that function 'no_exist' will take a while due to the number of checks it need to process. 
  
 ## UPDATES:
-#### What's new?
-     There are options available for the script, from indicating what level you want to audit at and also what categories id you want to exclude.
-     Also, there is a verbose option -vv where debug file will display all the revelant information  e.g. the function executed in the script.
+What's new?
+There are options available for the script, from indicating what level you want to audit at and also what categories id you want to exclude.
+Also, there is a verbose option -vv where debug file will display all the revelant information  e.g. the function executed in the script.
      
  
