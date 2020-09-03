@@ -90,17 +90,20 @@ function rename()
 ## USAGE FUNCTION ##
 function usage()
 {
-	cat << EOF
+        cat << EOF
 OPTIONS: 
-	-h, 	--help		Display the help message
-	-ls, 	--list
-	-l, 	--level		Indicate the level 1 or 2 for server/workstation to audit
-	-a,	--all		Indicate to the script to run audit level 1 and 2
-	-e, 	--exclude	Indicate the level and categories id to be excluded from auditing.
-	-vv, 	--verbose	Display the debug file, while the script is running
+        -h,     --help          Display the help message
+        -ls,    --list
+        -l,     --level         Indicate the level 1 or 2 for server/workstation to audit
+        -e,     --exclude       Indicate the level and categories id to be excluded from auditingi. 
+                                FORMAT: LEVEL.CAT_ID meaning level first followed by categories id
+                                e.g. 1.1.1  ==> meaning exclude level 1 and categories id 1.1 
+        -vv,    --verbose       Display the debug file, while the script is running
 
 EXAMPLE:
-	sudo ./centOS8.sh -l 1 -e 1,1.1 -vv	#Execute the script to audit only LEVEL 1 but exclude categories id 1.1
+        sudo ./centOS8.sh -e 1.1.1,2.1.1 -vv    #Execute the script to audit only LEVEL 1 but exclude categories id 1.1
+        sudo ./centOS8.sh -l 1 -e 1.2.1,1.6.1 -vv
+        sudo ./centOS8.sh -l 2 -e 2.1.1, 2.3.1 -vv
 
 EOF
 }
