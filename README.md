@@ -29,6 +29,11 @@ Auditing Script based on CIS-BENCHMARK CENTOS 8 v1.0.0
       cd cis-benchmark-centOS-8/
       sudo ./centOS8.sh -vv       #If you want to run everything in verbose mode
       
+#### Log Directory:
+     /var/log/centOS8_audit
+     |_____ debug        #debug file
+     |_____ json_log     #Go to this directory, if you want to see the results. It is formatted into a json file. 
+      
 ## Note:
 Hi all, this is my first time creating a project on GITHUB. Since, this is my first time doing such project, I would like to ask you guys to help me check it out. Feel free to send feedback on what to improve on or add any new features.
  
@@ -40,5 +45,8 @@ If you like the script, do leave a start :)
 What's new?
 There are options available for the script, from indicating what level you want to audit at and also what categories id you want to exclude.
 Also, there is a verbose option -vv where debug file will display all the revelant information  e.g. the function executed in the script.
+
+What's up next?
+I will be adding a display function to display the results from the json file.
      
  
