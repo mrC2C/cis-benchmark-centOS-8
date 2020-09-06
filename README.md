@@ -33,6 +33,8 @@ Auditing Script based on CIS-BENCHMARK CENTOS 8 v1.0.0
 Hi all, this is my first time creating a project on GITHUB. Since, this is my first time doing such project, I would like to ask you guys to help me check it out. Feel free to send feedback on what to improve on or add any new features.
  
 Do note that function 'no_exist' will take a while due to the number of checks it need to process. 
+
+If you like the script, do leave a start :)
  
 ## UPDATES:
 What's new?
