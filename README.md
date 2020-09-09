@@ -39,7 +39,7 @@ Hi all, this is my first time creating a project on GITHUB. Since, this is my fi
  
 Do note that function 'no_exist' will take a while due to the number of checks it need to process. 
 
-If you like the script, do leave a start :)
+If you like the script, do leave a star :)
  
 ## UPDATES:
 What's new?
