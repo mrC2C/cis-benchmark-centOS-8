@@ -1097,7 +1097,7 @@ function chk_ip6tables()
                 [ $(ip6tables -L | grep -E 'OUTPUT (policy DROP)') ] || score=$((score+1))
 	fi
 
-	[ $score -eq 0 ] && result="Pass"
+	[[ $score -eq 0 ]] && result="Pass"
 
 	write_result "$level" "$chp" "$catid" "$id" "$result"
 
@@ -1432,7 +1432,7 @@ function pam_config()
 		[ $(egrep -c "pam_pwquality.so.*try_first_pass.*local_users_only.*enforce-for-root.*retry=3" /etc/pam.d/system-auth ) -eq 1 ] || score=$((score+1))
 		[ $(egrep -c "pam_pwquality.so.*try_first_pass.*local_users_only.*enforce-for-root.*retry=3" /etc/pam.d/password-auth) -eq 1 ] || score=$((score+1))
 		minlen=$(grep minlen /etc/security/pwquality.conf | cut -f2 -d=)
-		[ $minlen -ge 14 ] || score=$((score+1))
+		[[ $minlen -ge 14 ]] || score=$((score+1))
 	
 	elif [[ "$id" == "5.4.1" ]]
 	then
@@ -1493,7 +1493,7 @@ function uae_cfg ()
 		[ $(useradd -D | grep "^${var}" | cut -f2 -d = ) -eq ${val} ] && result="Pass"
 
 	else
-		[ $(grep "^${var}" /etc/login.defs | cut -f2 ) -eq ${val} ] && result="Pass"
+		[ "$(grep "^${var}" /etc/login.defs | cut -f2 )" -eq "${val}" ] && result="Pass"
 	fi
 
 	#= REVIEW LIST OF USERS that does not conforms the policy =#
