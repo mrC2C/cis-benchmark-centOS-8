@@ -49,7 +49,7 @@ Also, there is a verbose option -vv where debug file will display all the revela
 What's up next?
 I will be adding a display function to display the results from the json file.
 
-Update 1.0.0.1
-patched up argument errors in the centOS8.sh
+Update 1.0.0.2
+patched up integer expression errors for function uae_cfg and paM_config
      
  
