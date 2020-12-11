@@ -1431,7 +1431,7 @@ function pam_config()
 	then
 		[ $(egrep -c "pam_pwquality.so.*try_first_pass.*local_users_only.*enforce-for-root.*retry=3" /etc/pam.d/system-auth ) -eq 1 ] || score=$((score+1))
 		[ $(egrep -c "pam_pwquality.so.*try_first_pass.*local_users_only.*enforce-for-root.*retry=3" /etc/pam.d/password-auth) -eq 1 ] || score=$((score+1))
-		minlen=$(grep minlen /etc/security/pwquality.conf | cut -f4 -d' ')
+		minlen=$(grep ^minlen /etc/security/pwquality.conf | cut -f4 -d' ')
 		[[ $minlen -ge 14 ]] || score=$((score+1))
 	
 	elif [[ "$id" == "5.4.1" ]]
@@ -2629,9 +2629,9 @@ then
 
 	#catg: user accounts and environment
 	if [[ !("${excl_arr1[@]}" =~ "5.5") ]]; then
-		run_test uae_cfg 1 five 5.5 5.5.0 PASS_MAX_DAYS 365 5	#Ensure password expiration is 365 days or less
-		run_test uae_cfg 1 five 5.5 5.5.1 PASS_MIN_DAYS 7 4	#Ensure minimum days between password changes is 7 or more 
-		run_test uae_cfg 1 five 5.5 5.5.2 PASS_WARN_AGE 7 6	#Ensure password expiration warning days is 7 or more 
+		run_test uae_cfg 1 five 5.5 5.5.0 ^PASS_MAX_DAYS 365 5	#Ensure password expiration is 365 days or less
+		run_test uae_cfg 1 five 5.5 5.5.1 ^PASS_MIN_DAYS 7 4	#Ensure minimum days between password changes is 7 or more 
+		run_test uae_cfg 1 five 5.5 5.5.2 ^PASS_WARN_AGE 7 6	#Ensure password expiration warning days is 7 or more 
 		run_test uae_cfg 1 five 5.5 5.5.3 INACTIVE 30 7		#Ensure inactive password lock is 30 days or less
 		run_test pwd_cfg 1 five 5.5 5.5.4			#Ensure all users last password change date is in the past
 		run_test sysacc_secured	1 five 5.5 5.5.5		#Ensure system accounts are secured
