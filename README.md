@@ -73,7 +73,7 @@ If you like the script, do leave a star :)
 Added a new function to display results from the json file.
 
 #### What's Next?
-For now there is nothing coming up yet. Also I m looking for contributors to enrich and enhance this project, to ensure the script is more effective.
+I m looking for contributors to enrich and enhance this project, to ensure the script is more effective.
 
 #### Update 1.0.1.0
 Added new function to display results from json file. 
