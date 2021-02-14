@@ -43,13 +43,11 @@ If you like the script, do leave a star :)
  
 ## UPDATES:
 What's new?
-There are options available for the script, from indicating what level you want to audit at and also what categories id you want to exclude.
-Also, there is a verbose option -vv where debug file will display all the revelant information  e.g. the function executed in the script.
+Added a function to display the results from the json file.
 
 What's up next?
-I will be adding a display function to display the results from the json file.
+Nothing new is coming up, but if you have ideas you want to add to the script, feel free to tell me. Also, I am looking for contributors for this project to enhance the script to be more effective when it is being executed. 
 
-Update 1.0.0.2
-patched up integer expression errors for function uae_cfg and paM_config
-     
+Update 1.0.1.0
+Added function to display results from json file.
  
