@@ -42,12 +42,12 @@ Do note that function 'no_exist' will take a while due to the number of checks i
 If you like the script, do leave a star :)
  
 ## UPDATES:
-What's new?
-Added a function to display the results from the json file.
+What's New?
+Added a new function to display results from the json file.
 
-What's up next?
-Nothing new is coming up, but if you have ideas you want to add to the script, feel free to tell me. Also, I am looking for contributors for this project to enhance the script to be more effective when it is being executed. 
+What's Next?
+For now there is nothing coming up yet. Also I m looking for contributors to enrich and enhance this project, to ensure the script is more effective.
 
 Update 1.0.1.0
-Added function to display results from json file.
+Added new function to display results from json file. 
  
