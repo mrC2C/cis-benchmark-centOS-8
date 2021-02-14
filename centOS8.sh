@@ -99,6 +99,7 @@ OPTIONS:
                                 FORMAT: LEVEL.CAT_ID meaning level first followed by categories id
                                 e.g. 1.1.1  ==> meaning exclude level 1 and categories id 1.1 
         -vv,    --verbose       Display the debug file, while the script is running
+	-sh,	--show		Display results from the json file 
 
 EXAMPLE:
         sudo ./centOS8.sh -e 1.1.1,2.1.1 -vv    #Execute the script to audit both LEVEL 1 & 2 but exclude categories id 1.1
@@ -359,6 +360,7 @@ function retrieve()
 
 	rm "$JSN_DIR/retrieve.txt" 
 }
+
 
 		###   COMMON FUNCTION FOR BOTH LVL 1 & 2, ACROSS ALL CHAPTERS	###
 function not_scored()
