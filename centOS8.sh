@@ -101,8 +101,8 @@ OPTIONS:
         -vv,    --verbose       Display the debug file, while the script is running
 
 EXAMPLE:
-        sudo ./centOS8.sh -e 1.1.1,2.1.1 -vv    #Execute the script to audit only LEVEL 1 but exclude categories id 1.1
-        sudo ./centOS8.sh -l 1 -e 1.2.1,1.6.1 -vv
+        sudo ./centOS8.sh -e 1.1.1,2.1.1 -vv    #Execute the script to audit both LEVEL 1 & 2 but exclude categories id 1.1
+        sudo ./centOS8.sh -l 1 -e 1.2.1,1.6.1 -vv 
         sudo ./centOS8.sh -l 2 -e 2.1.1, 2.3.1 -vv
 
 EOF
@@ -283,8 +283,84 @@ function test_excluded()
 		num=$((num + 1))
 	done
 }
+		###  Display result in table format  ###
+function retrieve()
+{
+	local description formatter pass fail na level all
+	pass=0
+	fail=0
+	na=0
+	description=""
+	formatter=""
+	level=$1
+	all=$2
 
-		### COMMON FUNCTION FOR BOTH LVL 1 & 2, ACROSS ALL CHAPTERS	###
+	#create textfile
+	touch "$JSN_DIR/retrieve.txt"
+
+	l1Array=("one" "two" "three" "four" "five" "six")
+	l2Array=("one" "three" "four" "five" "six")
+
+	if [[ $level -eq 1 ]] || [[ $all -eq 1 ]]; then
+		echo "LEVEL 1"
+		for chp in "${l1Array[@]}"; do
+			echo "========="
+			echo "Chp $chp"
+			echo "========="
+			catidArr1=($(jq -c --arg chp ${chp} ".audit[] | select(.level==1) | .chapters[\"$chp\"].categories[] | .id" "$JSN_DIR/$JSN_FIL")) 
+			for cid in "${catidArr1[@]}"; do
+				pass=$(jq -c --arg chp ${chp} --arg cid ${cid} ".audit[] | select(.level==1) | .chapters[\"$chp\"].categories[] | select(.id==$cid) | .report[]" "$JSN_DIR/$JSN_FIL" | grep "Pass" | wc -l)
+				fail=$(jq -c --arg chp ${chp} --arg cid ${cid} ".audit[] | select(.level==1) | .chapters[\"$chp\"].categories[] | select(.id==$cid) | .report[]" "$JSN_DIR/$JSN_FIL" | grep "Fail" | wc -l)
+				na=$(jq -c --arg chp ${chp} --arg cid ${cid} ".audit[] | select(.level==1) | .chapters[\"$chp\"].categories[] | select(.id==$cid) | .report[]" "$JSN_DIR/$JSN_FIL" | grep "Null" | wc -l)
+				description=$(jq -c --arg chp ${chp} --arg cid ${cid} ".audit[] | select(.level==1) | .chapters[\"$chp\"].categories[] | select(.id==$cid) | .name" "$JSN_DIR/$JSN_FIL")
+				description=$(echo "${description}" | sed -e "s/\"//g")
+				echo "$cid,$description,$pass,$fail,$na,$total" >> "$JSN_DIR/retrieve.txt"
+			done
+			( 
+				echo -e "\t--,-----------,----,----,----" 
+				echo -e "\tID,Description,Pass,Fail,Null"
+				echo -e "\t--,-----------,----,----,----"
+				while read line; do
+					echo -e "\t$line" 
+				done < "$JSN_DIR/retrieve.txt"
+			) | column -t -s ","
+		done
+	fi
+
+	echo " "
+	echo " "
+
+	if [[ $level -eq 2 ]] || [[ $all -eq 1 ]]; then
+		echo "LEVEL 2"
+                for chp in "${l2Array[@]}"; do
+                        echo "========="
+                        echo "Chp $chp"
+                        echo "========="
+                        catidArr2=($(jq -c --arg chp ${chp} ".audit[] | select(.level==2) | .chapters[\"$chp\"].categories[] | .id" "$JSN_DIR/$JSN_FIL"))
+                        for cid in "${catidArr2[@]}"; do
+                                pass=$(jq -c --arg chp ${chp} --arg cid ${cid} ".audit[] | select(.level==2) | .chapters[\"$chp\"].categories[] | select(.id==$cid) | .report[]" "$JSN_DIR/$JSN_FIL" | grep "Pass" | wc -l)
+                                fail=$(jq -c --arg chp ${chp} --arg cid ${cid} ".audit[] | select(.level==2) | .chapters[\"$chp\"].categories[] | select(.id==$cid) | .report[]" "$JSN_DIR/$JSN_FIL" | grep "Fail" | wc -l)
+                                na=$(jq -c --arg chp ${chp} --arg cid ${cid} ".audit[] | select(.level==2) | .chapters[\"$chp\"].categories[] | select(.id==$cid) | .report[]" "$JSN_DIR/$JSN_FIL" | grep "Null" | wc -l)
+                                description=$(jq -c --arg chp ${chp} --arg cid ${cid} ".audit[] | select(.level==2) | .chapters[\"$chp\"].categories[] | select(.id==$cid) | .name" "$JSN_DIR/$JSN_FIL")
+				description=$(echo "${description}" | sed -e "s/\"//g")
+				echo "$cid,$description,$pass,$fail,$na,$total" >> "$JSN_DIR/retrieve.txt"
+                        done
+                        (
+                                echo -e "\t--,-----------,----,----,----"  
+                                echo -e "\tID,Description,Pass,Fail,Null" 
+                                echo -e "\t--,-----------,----,----,----" 
+				while read line; do
+					echo -e "\t$line"
+				done < "$JSN_DIR/retrieve.txt"  
+                        ) | column -t -s "," 
+                done
+        fi
+
+
+	rm "$JSN_DIR/retrieve.txt"
+}
+
+		###   COMMON FUNCTION FOR BOTH LVL 1 & 2, ACROSS ALL CHAPTERS	###
 function not_scored()
 {
 	local id 
@@ -2310,6 +2386,10 @@ while :; do
 			verbose=1
 			shift
 			;;
+		-sh|--show)
+			show=1 #display result on table format 
+			shift
+			;;
 		--)
 			shift
 			break
@@ -2319,7 +2399,7 @@ while :; do
 	esac
 done		
 
-[ -z $lvl ] && all=1
+[ -z $lvl ] && all=1 #run both level 1 & 2 
 
 
 banner		#Display the banner function
@@ -2786,10 +2866,17 @@ then
 	fi
 fi
 
-rename "$JSN_DIR" "$JSN_FIL"
-
 write_info "Audit Test is done"
 write_info "Script exited"
 echo "Done..."
+echo "-------------------------------------------------"
+echo " "
+
+if [[ $show -eq 1 ]]; then
+        retrieve "${lvl}" "${all}"
+fi
+
+rename "$JSN_DIR" "$JSN_FIL"
+
 unset excl_arr1
 unset excl_arr2
