@@ -19,13 +19,13 @@ Auditing Script based on CIS-BENCHMARK CENTOS 8 v1.0.0
                                 FORMAT: LEVEL.CAT_ID meaning level first followed by categories id
                                 e.g. 1.1.1  ==> meaning exclude level 1 and categories id 1.1 
         -vv,    --verbose       Display the debug file, while the script is running
-        -sh,	 --show		  Display results from the json file 
+        -sh,	--show		Display results from the json file 
 
      EXAMPLE:
-        sudo ./centOS8.sh -e 1.1.1,2.1.1 -vv    #Execute the script to audit for both LEVEL 1 & 2 but exclude categories id 1.1
-        sudo ./centOS8.sh -l 1 -e 1.2.1,1.6.1 -vv
-        sudo ./centOS8.sh -l 2 -e 2.1.1, 2.3.1 -vv
-        sudo ./centOS8.sh -vv -sh               #Execute the script to audit for both LEVELs and display the results
+       sudo ./centOS8.sh -e 1.1.1,2.1.1 -vv    #Execute the script to audit for both LEVEL 1 & 2 but exclude categories id 1.1
+       sudo ./centOS8.sh -l 1 -e 1.2.1,1.6.1 -vv
+       sudo ./centOS8.sh -l 2 -e 2.1.1, 2.3.1 -vv
+       sudo ./centOS8.sh -vv -sh               #Execute the script to audit for both LEVELs and display the results
         
 #### Run:
       cd cis-benchmark-centOS-8/
