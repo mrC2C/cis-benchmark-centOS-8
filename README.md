@@ -42,14 +42,12 @@ Do note that function 'no_exist' will take a while due to the number of checks i
 If you like the script, do leave a star :)
  
 ## UPDATES:
-What's new?
-There are options available for the script, from indicating what level you want to audit at and also what categories id you want to exclude.
-Also, there is a verbose option -vv where debug file will display all the revelant information  e.g. the function executed in the script.
+#### What's New?
+Added a new function to display results from the json file.
 
-What's up next?
-I will be adding a display function to display the results from the json file.
+#### What's Next?
+For now there is nothing coming up yet. Also I m looking for contributors to enrich and enhance this project, to ensure the script is more effective.
 
-Update 1.0.0.2
-patched up integer expression errors for function uae_cfg and paM_config
-     
+#### Update 1.0.1.0
+Added new function to display results from json file. 
  
