@@ -357,7 +357,7 @@ function retrieve()
         fi
 
 
-	rm "$JSN_DIR/retrieve.txt"
+	rm "$JSN_DIR/retrieve.txt" 
 }
 
 		###   COMMON FUNCTION FOR BOTH LVL 1 & 2, ACROSS ALL CHAPTERS	###
