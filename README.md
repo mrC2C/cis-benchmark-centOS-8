@@ -15,9 +15,7 @@ Auditing Script based on CIS-BENCHMARK CENTOS 8 v1.0.0
         -h,     --help          Display the help message
         -ls,    --list
         -l,     --level         Indicate the level 1 or 2 for server/workstation to audit
-        -e,     --exclude       Indicate the level and categories id to be excluded from auditing. 
-                                FORMAT: LEVEL.CAT_ID meaning level first followed by categories id
-                                e.g. 1.1.1  ==> meaning exclude level 1 and categories id 1.1 
+        -e,     --exclude       Indicate the level and categories id to be excluded from auditing. FORMAT: LEVEL.CAT_ID meaning level first followed by categories id e.g. 1.1.1  ==> meaning exclude level 1 and categories id 1.1 
         -vv,    --verbose       Display the debug file, while the script is running
 	-sh,	--show		Display results from the json file 
 
