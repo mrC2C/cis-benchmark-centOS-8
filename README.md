@@ -66,13 +66,3 @@ Do note that function 'no_exist' will take a while due to the number of checks i
 
 If you like the script, do leave a star :)
  
-## UPDATES:
-#### What's New?
-Added a new function to display results from the json file.
-
-#### What's Next?
-I m looking for contributors to enrich and enhance this project, to ensure the script is more effective.
-
-#### Update 1.0.1.0
-Added new function to display results from json file. 
- 
